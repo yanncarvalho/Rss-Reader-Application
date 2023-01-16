@@ -1,5 +1,6 @@
 package br.dev.yann.rssreader.auth.user;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -17,40 +18,38 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
 import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
 
-import br.dev.yann.rssreader.auth.role.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
  * User database entity
+ * 
+ * @author Yann Carvalho
  */
 @Entity(name = "Users")
 @Table(name = "users")
 public class User implements UserDetails{
 	
-  public void setId(UUID id) {
-		this.id = id;
-	}
-
-/**
-   * Serial Version UID
-   */	
+  @Serial
   private static final long serialVersionUID = 1L;
-   
+  
+  /**
+   *  Password Encoder 
+   */	
   @Transient @JsonIgnore 
   private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
- /**
+  /**
    * User id
    */	
   @Id
@@ -81,17 +80,17 @@ public class User implements UserDetails{
    */
   @Column(nullable = false)
   @NotBlank(message = "name must be informed.")
-  @Size(min = 3, max = 255, message = "name must be between {1} and {2} characters") 
+  @Size(min = 3, max = 255, message = "name must be between {0} and {1} characters") 
   private String name;
 
   /**
-   * User role
+   * User role 
+   * <br>by default role is {@link  RoleUser#USER USER} 
    */
-
-  @JsonIgnore 
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
-  private Role role;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 255)
+  @NotNull(message = "role must be informed.")
+  private UserRole role = UserRole.USER;
 
   /**
    * Empty constructor
@@ -105,7 +104,7 @@ public class User implements UserDetails{
    * @param username value {@link #username}
    * @param role value to {@link #role}
    */
-  public User(String name, String password, String username, Role role) {
+  public User(String name, String password, String username, UserRole role) {
     this.name = name;
     this.setPassword(password);
     this.username = username;
@@ -123,15 +122,17 @@ public class User implements UserDetails{
     this.setPassword(password);
     this.username = username;
   }
+  
   /**
    * @return {@link #id}
    */
   public UUID getId() {
 	return id;
   }
-
-
   
+  /**
+   * @param password update  {@link #password}
+   */
   public void setPassword(String password) {
 	this.password = passwordEncoder.encode(password);
   }
@@ -160,18 +161,23 @@ public class User implements UserDetails{
   /**
    * @return {@link #role}
    */
-  public Role getRole() {
+  public UserRole getRole() {
 	return role;
   }
   
-  public boolean authenticationPassword(String password) {
+  /**
+   * Authenticate Password
+   * @param password password to authenticate
+   * @return {@code true} if is correct {@code false} if is not
+   */
+  public boolean authenticatePassword(String password) {
 	  return passwordEncoder.matches(this.password, password);
   }
   
   /**
    * @param role update {@link #role}
    */
-  public void setRole(Role role) {
+  public void setRole(UserRole role) {
 	this.role = role;
   }
   
@@ -190,12 +196,11 @@ public class User implements UserDetails{
   public String getUsername() {
   	return username;
   }
-  
-  
+   
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Set.of(new SimpleGrantedAuthority("ROLE_"+role.getName()));
+    return Set.of(new SimpleGrantedAuthority("ROLE_"+role.toString()));
   }
 
   @Override
@@ -218,9 +223,10 @@ public class User implements UserDetails{
 	return true;
   }
 
-
   @Override
   public int hashCode() {
+    if(id == null)
+    	return super.hashCode();
 	return Objects.hash(id);
   }
 

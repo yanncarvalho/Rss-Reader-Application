@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS  rssreader_auth.users (
 	name VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	username VARCHAR(255) NOT NULL UNIQUE,
-	role_id BINARY(16) NOT NULL,
+	role VARCHAR(255) NOT NULL,
 	
-	PRIMARY KEY(id),
-	FOREIGN KEY (role_id) REFERENCES roles(id)
+	PRIMARY KEY(id)
 );

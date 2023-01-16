@@ -4,7 +4,4 @@ import jakarta.validation.constraints.NotBlank;
 
 public record UserDefaultRes(
 		@NotBlank
-		String Message
-		) {
-
-}
+		String Message) {}

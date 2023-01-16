@@ -2,6 +2,7 @@ package br.dev.yann.rssreader.auth.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -19,23 +20,14 @@ public class AuthProvider  implements AuthenticationProvider {
 	
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		
-		String providedUsername = authentication.getPrincipal().toString();
-		var user =  (User) userDetailsService.loadUserByUsername(providedUsername);
-		
-		String providedPassword = authentication.getCredentials().toString();
-		
-		
-
-		if(user.authenticationPassword(providedPassword)) {
-		
-			throw new RuntimeException("Incorrect Credentials");
+		String username = authentication.getPrincipal().toString();
+		String password = authentication.getCredentials().toString();
+		var user =  (User) userDetailsService.loadUserByUsername(username);
+	
+		if(user.authenticatePassword(password)) {
+			throw new BadCredentialsException("Incorrect credentials");
 		}
-
-
-		Authentication authenticationResult = 
-				new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
-		return authenticationResult;
+		return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
 	}
 
 	@Override

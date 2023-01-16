@@ -8,8 +8,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import br.dev.yann.rssreader.auth.user.record.UserDefaultRes;
-import br.dev.yann.rssreader.auth.configuration.TokenService;
+import br.dev.yann.rssreader.auth.configuration.JWTToken;
 import br.dev.yann.rssreader.auth.user.record.FindRes;
 import br.dev.yann.rssreader.auth.user.record.FindUsersRes;
 import br.dev.yann.rssreader.auth.user.record.JWTRes;
@@ -32,6 +32,7 @@ import br.dev.yann.rssreader.auth.user.record.LoginReq;
 import br.dev.yann.rssreader.auth.user.record.SaveReq;
 import br.dev.yann.rssreader.auth.user.record.UpdateAsAdminReq;
 import br.dev.yann.rssreader.auth.user.record.UpdateReq;
+import br.dev.yann.rssreader.auth.user.record.UserDefaultRes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -42,40 +43,38 @@ public class UserController{
   private UserService service;
   
   @Autowired 
-  private TokenService tokenService;
+  private JWTToken tokenService;
   
   @Autowired
   private AuthenticationManager manager;
 
-
   @GetMapping("admin/findUsers")
-  public ResponseEntity<Object> findAll(
+  @ResponseStatus(HttpStatus.OK)
+  public Page<FindUsersRes> findAll(
 		  @RequestParam(defaultValue = "0") @PositiveOrZero @Valid Integer page,
 		  @RequestParam(defaultValue = "10") @PositiveOrZero @Valid Integer size,
 		  @RequestParam(defaultValue = "id") @PositiveOrZero @Valid String sort){
     Page<User> usersFound = service.findAllUsers(PageRequest.of(page, size, Sort.by(sort)));
     var userRes = usersFound.get().map(FindUsersRes::new).toList();
-    return ResponseEntity
-    		.status(HttpStatus.OK)
-    		.body(new PageImpl<FindUsersRes>(userRes, usersFound.getPageable(), usersFound.getSize()));
+    return new PageImpl<>(userRes, usersFound.getPageable(), usersFound.getSize());
   }
 
   @GetMapping("admin/findUsers/{id}")
-  public ResponseEntity<Object> findUserByIdAsAdmin(@PathVariable("id") UUID id){
+  @ResponseStatus(HttpStatus.OK)
+  public FindUsersRes findUserByIdAsAdmin(@PathVariable("id") UUID id){
     var  user = service.findById(id);
     if(user == null){
     	throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
     }
 
-    return ResponseEntity
-    		.status(HttpStatus.OK)
-    		.body(new FindUsersRes(user));
+    return new FindUsersRes(user);
   }
 
   @PutMapping("admin/update")
-  public ResponseEntity<Object>  updateUserAsAdmin(@Valid @RequestBody UpdateAsAdminReq update){
+  @ResponseStatus(HttpStatus.OK)
+  public UserDefaultRes updateUserAsAdmin(@Valid @RequestBody UpdateAsAdminReq update){
 
-    if(update.hasUsername() && !service.hasUsernameWithOriginalId(update.username(), update.id())) {
+    if(update.hasUsername() && service.isUsernameUsedByAnotherUser(update.username(), update.id())) {
     	throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
     }
 
@@ -84,87 +83,84 @@ public class UserController{
     }
 
     service.updateAsAdmin(update);
-    return ResponseEntity
-    		.status(HttpStatus.OK)
-    		.body(new UserDefaultRes("User updated successfully"));
+    return new UserDefaultRes("User updated successfully");
   }
 
   @DeleteMapping("admin/delete/{id}")
-  public ResponseEntity<Object> delete(@PathVariable("id") UUID id) {
+  @ResponseStatus(HttpStatus.OK)
+  public UserDefaultRes delete(@PathVariable("id") UUID id) {
     service.deleteUser(id);
-    return ResponseEntity
-    		.status(HttpStatus.OK).body(new UserDefaultRes("User deleted successfully!"));
+    return new UserDefaultRes("User deleted successfully!");
   }
 
   @PutMapping("update")
-  public ResponseEntity<Object> updade(@RequestAttribute(name = "userUUID") UUID id, @RequestBody @Valid UpdateReq update) {
-    if(update.hasUsername() && !service.hasUsernameWithOriginalId(update.username(), id)) {
+  @ResponseStatus(HttpStatus.OK)
+  public JWTRes updade(@RequestAttribute(name = "userUUID") UUID id, @RequestBody @Valid UpdateReq update) {
+    if(update.hasUsername() && service.isUsernameUsedByAnotherUser(update.username(), id)) {
     	throw new ResponseStatusException(
     			HttpStatus.CONFLICT, "Username already exists");
     }
     User user = service.update(update, id);
-  
-    var tokenJWT = tokenService.getToken(user);
-    var exp = tokenService.getClaims(tokenJWT).getExpirationTime().getTime();
-    return ResponseEntity
-    		.status(HttpStatus.OK)
-    		.body(new JWTRes (tokenJWT, "Bearer", exp));
+    return jwtResponse(user);
   }
 
   @DeleteMapping("delete")
-  public ResponseEntity<Object> deleteUserAsAdmin(@RequestAttribute(name = "userUUID")  UUID id){
-   if(!service.existsById(id)){
+  @ResponseStatus(HttpStatus.OK)
+  public UserDefaultRes deleteUserAsAdmin(@RequestAttribute(name = "userUUID")  UUID id){
+    if(!service.existsById(id)){
 	   throw new ResponseStatusException(
  			  HttpStatus.NOT_FOUND, "The user was not found");
     }
 
 	service.deleteUser(id);
-    return ResponseEntity	
-    		.status(HttpStatus.OK)
-    		.body(new UserDefaultRes("User deleted successfully!"));
+    return new UserDefaultRes("User deleted successfully!");
   }
 
   @GetMapping("find")
-  public ResponseEntity<Object> find(@RequestAttribute(name = "userUUID") UUID id) {
+  @ResponseStatus(HttpStatus.OK)
+  public FindRes findById(@RequestAttribute(name = "userUUID") UUID id) {
 	var user =  service.findById(id);  	
-    return ResponseEntity.status(HttpStatus.OK)
-    		.body(new FindRes(user.getUsername(), user.getName()));
+    return new FindRes(user.getUsername(), user.getName());
   }
 
   @PostMapping("login")
-  public ResponseEntity<Object> login(@Valid @RequestBody LoginReq login) {
+  @ResponseStatus(HttpStatus.OK)
+  public JWTRes login(@Valid @RequestBody LoginReq login) {
 	  
-		UsernamePasswordAuthenticationToken token = new 
-				UsernamePasswordAuthenticationToken(
-						login.username(), 
-						login.password());
+	UsernamePasswordAuthenticationToken token = new 
+			UsernamePasswordAuthenticationToken(
+					login.username(), 
+					login.password());
 				
-		Authentication authResult = manager.authenticate(token);
-		if(!authResult.isAuthenticated()) {
-			throw new  RuntimeException("not valid password");
-		}
-		
-       var tokenJWT = tokenService.getToken((User)authResult.getPrincipal());
-       var exp = tokenService.getClaims(tokenJWT).getExpirationTime().getTime();
-       return ResponseEntity 
-    		  .status(HttpStatus.OK)
-    		  .body(new JWTRes (tokenJWT, "Bearer", exp));
+	Authentication authResult = manager.authenticate(token);
+	if(!authResult.isAuthenticated()) {
+		throw new BadCredentialsException("Incorrect credentials");
+	}
+
+	User user = (User) authResult.getPrincipal();
+	return jwtResponse(user);
 
   }
 
+
   @PostMapping("save")
-  public ResponseEntity<Object> save(@RequestBody @Valid SaveReq save){
+  @ResponseStatus(HttpStatus.CREATED)
+  public UserDefaultRes save(@RequestBody @Valid SaveReq save){
     if (service.hasUsername(save.username())) {
     	throw new ResponseStatusException(
     			HttpStatus.CONFLICT, "Username already exists");
     }
 
-	var newUser = new User(save.name(), save.password(), save.username());
-    service.save(newUser);
-    return ResponseEntity
-    		   .status(HttpStatus.CREATED)
-    		   .body(new UserDefaultRes("User created!"));
+    service.save(save);
+    return new UserDefaultRes("User created!");
 
+  }
+  
+  private JWTRes jwtResponse(User user) {
+	 var tokenJWT = tokenService.getToken(user);
+      var exp = tokenService.getClaims(tokenJWT).getExpirationTime();
+
+      return new JWTRes (tokenJWT, "Bearer", exp);
   }
 
 }

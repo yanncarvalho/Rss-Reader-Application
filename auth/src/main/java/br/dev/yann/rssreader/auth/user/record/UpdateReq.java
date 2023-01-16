@@ -10,25 +10,21 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateReq(
 	
-		@Size(min = 3, max = 255) @NotBlank
-		String name,
+	@Size(min = 3, max = 255) @NotBlank
+	String name,
+	boolean hasName,
 		
-		boolean hasName,
+	@Size(min = 3, max = 255) @NotBlank
+	@Pattern(regexp = "^[A-Z0-9_\\.]+$") 
+	String username,
+	boolean hasUsername,
 		
-		@Size(min = 3, max = 255) @NotBlank
-		@Pattern(regexp = "^[A-Z0-9_\\.]+$") 
-		String username,
-		
-		boolean hasUsername,
-		
-		@Size(min = 3, max = 255) @NotBlank
-		String password,		
-		
-		boolean hasPassword
-		){		
+	@Size(min = 3, max = 255) @NotBlank
+	String password,		
+	boolean hasPassword){		
+	
 	@JsonCreator
 	public UpdateReq( String name, String username, String password) {
-		
 		this(name == null ? "STANDARD_VALUE" : name, 
 			name != null, 
 			username == null ? "STANDARD_VALUE" : Strings.toUpperCase(username), 

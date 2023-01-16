@@ -1,10 +1,14 @@
 package br.dev.yann.rssreader.auth.configuration;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.BadJwtException;
+import org.springframework.security.oauth2.jwt.JwtEncodingException;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.JOSEException;
@@ -21,7 +25,7 @@ import com.nimbusds.jwt.SignedJWT;
 import br.dev.yann.rssreader.auth.user.User;
 
 @Service
-public class TokenService {
+public class JWTToken {
 
   @Value("${jwt.token.duration-in-days}")
   private Integer expiryTime;
@@ -36,25 +40,22 @@ public class TokenService {
 
     try {
 
-      long daysFromNow = new Date().getTime() + TimeUnit.DAYS.toMillis(expiryTime);
-
+      var instantNow = LocalDateTime.now().plusDays(expiryTime).toInstant(ZoneOffset.UTC);
       var header = new JWSHeader.Builder(JWSAlgorithm.HS256).build();
-      var claims = new JWTClaimsSet.Builder()
+      var playload = new JWTClaimsSet.Builder()
                                     .issuer(issuer)
                                     .subject(user.getId().toString())
-                                    .expirationTime(new Date(daysFromNow))
+                                    .expirationTime(Date.from(instantNow))
                                     .build();
 
       var signer = new MACSigner(secret.getBytes());
-
-      var signedJWT = new SignedJWT(header, claims);
-
+      var signedJWT = new SignedJWT(header, playload);
       signedJWT.sign(signer);
 
       return signedJWT.serialize();
 
     } catch (JOSEException e) {
-    	throw new RuntimeException("erro ao gerar token jwt", e);
+    	throw new JwtEncodingException("Error generating JWT", e);
     }
   }
 
@@ -64,31 +65,23 @@ public class TokenService {
     return jwsObject.verify(verifier);
   }
 
-  public JWTClaimsSet getClaims(String token) {
-
+  public JWTClaimsSet getClaims(String token){
 	    try {
 	        JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
-	 
-	        if(claims.getExpirationTime() == null || claims.getExpirationTime().before(new Date())){
-	          return null;
-	        }
-
-	        if(claims.getIssuer() == null || !claims.getIssuer().equals(issuer)){
-	          return null;
-	        }
-
-	        if(claims.getSubject() == null){
-	          return null;
-	        } 
-
-	        if (!isTokenValid(token, secret.getBytes())) {
-	          return null;
+	        
+	        var exp = claims.getExpirationTime();
+	        var instantNow = Instant.now().atOffset(ZoneOffset.UTC);
+	          
+			if((exp == null || exp.toInstant().atOffset(ZoneOffset.UTC).isAfter(instantNow))
+	           && (claims.getIssuer() == null || !claims.getIssuer().equals(issuer))
+	           &&  claims.getSubject() == null 
+	           && !isTokenValid(token, secret.getBytes())) {
+				throw new JOSEException();
 	        }
 	      
 	        return claims;
 	      } catch (ParseException | JOSEException e) {
-	        return null;
-
+	          throw new BadJwtException("Error validating JWT", e);
 	      }
   }
   

@@ -6,15 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 
 public record LoginReq(
 	  @NotBlank
-	  String username,
-			
+	  String username,		
 	  @NotBlank
 	  String password) {
 	
 	  public LoginReq(String username, String password) {
-	        this.username = Strings.toUpperCase(username);
-	        this.password = password;
-	    }
-
-	
+	     this.username = Strings.toUpperCase(username);
+	     this.password = password;
+	  }
 }
