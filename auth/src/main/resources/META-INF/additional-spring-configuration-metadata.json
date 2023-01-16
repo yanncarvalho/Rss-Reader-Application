@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "jwt.token.duration-in-days",
+    "type": "java.lang.Integer",
+    "description": "Token expiry time in days"
+  },
+  {
+    "name": "jwt.token.secret",
+    "type": "java.lang.String",
+    "description": "JWT Secret key"
+  },
+  {
+    "name": "jwt.token.issuer",
+    "type": "java.lang.String",
+    "description": "JWT Issuer"
+  },
+  {
+    "name": "flyway.password",
+    "type": "java.lang.String",
+    "description": "database password for flyway migration"
+  },
+  {
+    "name": "flyway.user",
+    "type": "java.lang.String",
+    "description": "database user for flyway migration"
+  },
+  {
+    "name": "flyway.url",
+    "type": "java.lang.String",
+    "description": "database url for flyway migration"
+  }
+]}
