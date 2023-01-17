@@ -1,6 +1,8 @@
 package br.dev.yann.rssreader.auth.configuration;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.JwtEncodingException;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,70 +25,187 @@ import br.dev.yann.rssreader.auth.user.SingleUserAdminException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Handle Exception in the application, extends {@link Http403ForbiddenEntryPoint}.
+ * 
+ * @author Yann Carvalho
+ */
 @RestControllerAdvice
 public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	
-
+	/**
+	 * The most generic handler. It is call when {@link Exception} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return  error reason: 'An internal server error occurred, contact system administrator.',
+	 * 			{@link Exception#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#INTERNAL_SERVER_ERROR}.
+	 */
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorValidator processException(Exception e) {
-	    return new ErrorValidator("An internal server error occurred, contact system administrator", 
-	    						  e.getMessage());
-    }
-	 
-	@ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorValidator> processResponseStatusException(ResponseStatusException e) {
-	   return ResponseEntity
-			   .status(e.getStatusCode())
-			   .body(new ErrorValidator(e.getReason(), e.getMessage()));
-    }
-	
-	@ExceptionHandler(UsernameNotFoundException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorValidator processUsernameNotFoundException(UsernameNotFoundException e) {
-	   return new ErrorValidator("Username not found", e.getMessage());
-    }
-	
-	@ExceptionHandler(SingleUserAdminException.class)
-	@ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorValidator processSingleUserAdminException(SingleUserAdminException e) {
-	   return new ErrorValidator("User is the only admin of the system", e.getMessage());
-    }
-	
-	@ExceptionHandler(BadJwtException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorValidator processBadJwtException(BadJwtException e) {
-	   return new ErrorValidator("Bad JWT", e.getMessage());
-    }
-	
-	@ExceptionHandler(JwtEncodingException.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorValidator procesJwtEncodingException(JwtEncodingException e) {
-	   return new ErrorValidator("Not possible to Encode JWT", e.getMessage());
-    }
-	
-	@ExceptionHandler(BadCredentialsException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorValidator processBadCredentialsException(BadCredentialsException e) {
-	   return new ErrorValidator("Bad Credentials", e.getMessage());
-    }
-	
-	@ExceptionHandler(NullPointerException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorValidator procesNullPointerException(NullPointerException e) {
-	   return new ErrorValidator("Data is null", e.getMessage());
+	public ErrorRes processException(Exception ex)  {
+	    return new ErrorRes("An internal server error occurred, contact system administrator.", 
+	    		ex.getMessage());
     }
 
+	/**
+	 * It is call when {@link ResponseStatusException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return {@link ResponseStatusException#getReason error reason}, 
+	 * 			{@link ResponseStatusException#getMessage error message} wrapped in a {@link List}
+	 *          and {@link ResponseStatusException#getResponseHeaders http status}.
+	 */
+	@ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorRes> processResponseStatusException(ResponseStatusException ex)  {
+	   return ResponseEntity
+			   .status(ex.getStatusCode())
+			   .body(new ErrorRes(ex.getReason(), ex.getMessage()));
+    }
+	
+	/**
+	 * It is call when {@link UsernameNotFoundException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'User not found.',
+	 * 		   {@link UsernameNotFoundException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
+	 */
+	@ExceptionHandler(UsernameNotFoundException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorRes processUsernameNotFoundException(UsernameNotFoundException ex)  {
+	   return new ErrorRes("User not found.", ex.getMessage());
+    }
+	
+	
+	/**
+	 * It is call when {@link MethodArgumentNotValidException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'Request is not valid',
+	 * 			{@link MethodArgumentNotValidException#getBindingResult error message} 
+	 * 			wrapped in a {@link List}  of String
+	 *          and http status:  {@link HttpStatus#BAD_REQUEST}.
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorRes processMethodArgumentNotValidException(MethodArgumentNotValidException ex)  {
+		var errors = 
+				ex.getBindingResult()
+						.getAllErrors().stream()
+						.map(error -> ((FieldError) error).getField() + " " + error.getDefaultMessage())
+						.sorted(Comparator.naturalOrder())
+						.toList();
+	    	
+		return new ErrorRes("Request is not valid.", errors);
+    }
+	
+	/**
+	 * It is call when {@link SingleUserAdminException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'User is the only admin of the system',
+	 * 			{@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#CONFLICT}.
+	 */
+	@ExceptionHandler(SingleUserAdminException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorRes processSingleUserAdminException(SingleUserAdminException ex)  {
+	   return new ErrorRes("User is the only admin of the system.", ex.getMessage());
+    }
+	
+	/**
+	 * It is call when {@link BadJwtException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'Bad JWT',
+	 * 			{@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
+	 */
+	@ExceptionHandler(BadJwtException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorRes processBadJwtException(BadJwtException ex)  {
+	   return new ErrorRes("Bad JWT.", ex.getMessage());
+    }
+	
+	/**
+	 * It is call when {@link JwtEncodingException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'Not possible to encode JWT',
+	 * 			{@link JwtEncodingException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#INTERNAL_SERVER_ERROR}.
+	 */
+	@ExceptionHandler(JwtEncodingException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorRes procesJwtEncodingException(JwtEncodingException ex)  {
+	   return new ErrorRes("Not possible to encode JWT.", ex.getMessage());
+    }
+	
+	/**
+	 * It is call when {@link BadCredentialsException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'Bad Credentials',
+	 * 			{@link BadCredentialsException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
+	 */
+	@ExceptionHandler(BadCredentialsException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorRes processBadCredentialsException(BadCredentialsException ex)  {
+	   return new ErrorRes("Bad Credentials.", ex.getMessage());
+    }
+	
+	/**
+	 * It is call when {@link NullPointerException} is thrown.
+	 * @param ex error thrown.
+	 * 
+	 * @return 	error reason: 'Data are null',
+	 * 			{@link NullPointerException#getMessage error message} wrapped in a {@link List}
+	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
+	 */
+	@ExceptionHandler(NullPointerException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorRes procesNullPointerException(NullPointerException ex)  {
+	   return new ErrorRes("Data are null.", ex.getMessage());
+    }
+
+	/**
+	 * It is call when request fail in {@link SecurityConfiguration}
+	 * @return error reason: 'Access forbidden',
+	 * 		   {@link AuthenticationException#getMessage error message} wrapped in a {@link List}
+	 *         and http status: {@link HttpStatus#FORBIDDEN}.
+	 */
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse res,
 	    AuthenticationException authException) throws IOException {
 		res.setContentType("application/json;charset=UTF-8");
 	    res.setStatus(HttpStatus.FORBIDDEN.value());
 	    res.getWriter().write(new ObjectMapper().writeValueAsString(
-	    	 new ErrorValidator("Access forbidden", authException.getMessage())
+	    	 new ErrorRes("Access forbidden.", authException.getMessage())
 	     ));
 	}
 	
-	
-    private record ErrorValidator(String message, String error) {}
+	/**
+	 * Error response record.
+	 *
+	 * @param message {@link #message}.
+	 * @param error {@link #error}.
+	 */
+    private record ErrorRes(
+    		/** custom message.*/
+    		String message, 
+    		
+    		/**	error message.*/
+    		List<String> errors) {
+    	
+    	/**
+    	 * Constructs a {@code ErrorRes} with message and error as parameters
+    	 * @param message {@link #message} 
+    	 * @param error {@link #error} wrapped in a {@link List}
+    	 */
+    	public ErrorRes (String message, String error) {
+    		this(message, List.of(error));
+    	}
+    }
 }

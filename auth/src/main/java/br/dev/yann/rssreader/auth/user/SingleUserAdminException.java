@@ -3,8 +3,8 @@ package br.dev.yann.rssreader.auth.user;
 import java.io.Serial;
 
 /**
- * Thrown if there is only one user {@link UserRole#ADMIN Admin} role 
- * and try to change its role or delete it.
+ * Throw if there is only one user with {@link UserRole#ADMIN Admin} role 
+ * and it has been tried to change its role or delete it.
  *
  * @author Yann Carvalho
  */

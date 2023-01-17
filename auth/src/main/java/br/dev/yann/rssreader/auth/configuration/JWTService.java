@@ -24,28 +24,60 @@ import com.nimbusds.jwt.SignedJWT;
 
 import br.dev.yann.rssreader.auth.user.User;
 
+/**
+ * JWT service to encode and decode.
+ * 
+ * @author Yann Carvalho
+ */
 @Service
-public class JWTToken {
+public class JWTService {
 
+  /**
+   * Token duration in days.
+   */	
   @Value("${jwt.token.duration-in-days}")
-  private Integer expiryTime;
-	
+  private int expiryTime;
+  
+  /**
+   * Token secret. The secret must be at least 256 bits long 
+   * and not {@code null}.
+   */	
   @Value("${jwt.token.secret}")
   private String secret;
-	
+
+  /**
+   * Application issuer.
+   */
   @Value("${jwt.token.issuer}")
   private String issuer;
-	
-  public String getToken(User user) {
+
+  /**
+   * <p> 
+   *    Encode JWT. 
+   * </p>
+   * <p>
+   *   The token is generated with claims:
+   *   <ul>
+   *     <li>iss - {@link Issuer}
+   *     <li>sub - {@link User#getId User id}
+   *     <li>exp - {@link expiryTime Expiry Time}
+   * 	</ul>
+   * </p>
+   *  @param user user that requires token.
+   *  @return String with token.
+   *  @throws JwtEncodingException if unable to generate JWT.
+   *  @see #decode
+   */
+  public String encode(User user) {
 
     try {
 
-      var instantNow = LocalDateTime.now().plusDays(expiryTime).toInstant(ZoneOffset.UTC);
+      var instantExpiration = LocalDateTime.now().plusDays(expiryTime).toInstant(ZoneOffset.UTC);
       var header = new JWSHeader.Builder(JWSAlgorithm.HS256).build();
       var playload = new JWTClaimsSet.Builder()
                                     .issuer(issuer)
                                     .subject(user.getId().toString())
-                                    .expirationTime(Date.from(instantNow))
+                                    .expirationTime(Date.from(instantExpiration))
                                     .build();
 
       var signer = new MACSigner(secret.getBytes());
@@ -59,13 +91,29 @@ public class JWTToken {
     }
   }
 
+  /**
+   *  Checks the signature of Token with the specified verifier.
+   *  
+   *  @param token token.
+   *  @param secret {@link secret token secret}.
+   *  @return {@code true} if token is valid {@code false} if is not.
+   *  
+   */
   private boolean isTokenValid(String token, byte[] secret) throws ParseException, JOSEException {
     JWSObject jwsObject = JWSObject.parse(token);
     JWSVerifier verifier = new MACVerifier(secret);
     return jwsObject.verify(verifier);
   }
 
-  public JWTClaimsSet getClaims(String token){
+  /**
+   *  Decode token.
+   *   
+   *  @param token token.
+   *  @return {@link JWTClaimsSet} with JWT specification.
+   *  @throws BadJwtException if token does not have any claim
+   *  set correctly as in {@link #encode} or {@link #isTokenValid is token not valid}.
+   */
+  public JWTClaimsSet decode(String token){
 	    try {
 	        JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
 	        

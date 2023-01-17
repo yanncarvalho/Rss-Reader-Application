@@ -32,7 +32,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * User database entity
+ * User is the representation of users data to persist in database.
  * 
  * @author Yann Carvalho
  */
@@ -44,13 +44,15 @@ public class User implements UserDetails{
   private static final long serialVersionUID = 1L;
   
   /**
-   *  Password Encoder 
+   *  Password encoders.
    */	
   @Transient @JsonIgnore 
   private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   /**
-   * User id
+   * Unique user identification.
+   * 
+   * @see UUID
    */	
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -59,24 +61,24 @@ public class User implements UserDetails{
   private UUID id;
 
   /**
-   * User username
+   * User login name.
    */	
   @Column(name = "username", unique = true, nullable = false)
   @NotBlank(message = "username must be informed.")
-  @Size(min = 3, max = 255, message = "username must be between {1} and {2} characters") 
+  @Size(min = 3, max = 255, message = "username must be between {0} and {1} characters") 
   private String username;
 
   /**
-   * Encrypted user password
+   * Encrypted user password.
    */
   @Column(nullable = false)
   @NotBlank(message = "password must be informed.")
-  @Size(min = 3, max = 255, message = "password must be between {1} and {2} characters") 
+  @Size(min = 3, max = 255, message = "password must be between {0} and {1} characters") 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
 
   /**
-   * User name
+   * User name.
    */
   @Column(nullable = false)
   @NotBlank(message = "name must be informed.")
@@ -84,8 +86,11 @@ public class User implements UserDetails{
   private String name;
 
   /**
-   * User role 
-   * <br>by default role is {@link  RoleUser#USER USER} 
+   * 
+   * User role. 
+   * <br>
+   * By default role is {@link  RoleUser#USER User}.
+   * @see UserRole
    */
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 255)
@@ -93,29 +98,15 @@ public class User implements UserDetails{
   private UserRole role = UserRole.USER;
 
   /**
-   * Empty constructor
+   * Empty constructor.
    */
   public User() {}	
 
   /**
-   * Constructor
-   * @param name value to {@link #name}
-   * @param password value to {@link #password}
-   * @param username value {@link #username}
-   * @param role value to {@link #role}
-   */
-  public User(String name, String password, String username, UserRole role) {
-    this.name = name;
-    this.setPassword(password);
-    this.username = username;
-    this.role = role;
-  }
-
-  /**
-   * Constructor
-   * @param name value to {@link #name}
-   * @param password value to {@link #password}
-   * @param username value {@link #username}
+   * Constructs a {@code User} with name, password and username as parameters.
+   * @param name value to {@link #name}.
+   * @param password value to {@link #password}.
+   * @param username value {@link #username}.
    */
   public User(String name, String password, String username) {
     this.name = name;
@@ -124,65 +115,67 @@ public class User implements UserDetails{
   }
   
   /**
-   * @return {@link #id}
+   * @return {@link #id}.
    */
   public UUID getId() {
 	return id;
   }
   
   /**
-   * @param password update  {@link #password}
+   * @param password updates {@link #password}.
    */
   public void setPassword(String password) {
 	this.password = passwordEncoder.encode(password);
   }
 
  /**
-   * @param username update {@link #username}
+   * @param username updates {@link #username}.
    */
   public void setUsername(String username) {
 	this.username = username;
   }
 
   /**
-   * @return {@link #name}
+   * @return {@link #name}.
    */
   public String getName() {
 	return name;
   }
   
   /**
-   * @param name update {@link #name}
+   * @param name updates {@link #name}.
    */
   public void setName(String name) {
 	this.name = name;
   }
 
   /**
-   * @return {@link #role}
+   * @return {@link #role}.
    */
   public UserRole getRole() {
 	return role;
   }
   
   /**
-   * Authenticate Password
-   * @param password password to authenticate
-   * @return {@code true} if is correct {@code false} if is not
+   * Authenticate password.
+   * @param password the raw password to authenticate.
+   * @return {@code true} if authenticated, {@code false} if not.
+   * 
+   * @see #password
    */
   public boolean authenticatePassword(String password) {
 	  return passwordEncoder.matches(this.password, password);
   }
   
   /**
-   * @param role update {@link #role}
+   * @param role updates {@link #role}.
    */
   public void setRole(UserRole role) {
 	this.role = role;
   }
   
   /**
-   * @return {@link #password}
+   * @return {@link #password}.
    */
   @Override
   public String getPassword() {
@@ -190,7 +183,7 @@ public class User implements UserDetails{
   }
     
   /**
-   * @return {@link #username}
+   * @return {@link #username}.
    */
   @Override
   public String getUsername() {

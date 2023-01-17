@@ -18,18 +18,35 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * JWT validation filter, this class extends {@link OncePerRequestFilter}.
+ * 
+ * @author Yann Carvalho
+ */
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 	
+    /**
+     * Handler Exception Resolver
+     * @see HandlerExceptionResolver
+     */
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 	
+    /**
+     * User Service
+     * @see UserService
+     */
     @Autowired
-    private UserService service;
+    private UserService userService;
     
+    /**
+     * JWT service to encode and decode.
+     * @see JWTService
+     */
     @Autowired
-    private JWTToken tokenService;
+    private JWTService tokenService;
     
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -37,9 +54,9 @@ public class JWTFilter extends OncePerRequestFilter {
        
         try {
                var tokenJWT = retrieveToken(request);
-               var subject = tokenService.getClaims(tokenJWT).getSubject();
+               var subject = tokenService.decode(tokenJWT).getSubject();
                var id = UUID.fromString(subject);
-               var user = service.findById(id);
+               var user = userService.findById(id);
                request.setAttribute("userUUID", id);
                var authentication = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
                SecurityContextHolder.getContext().setAuthentication(authentication);    
@@ -49,6 +66,13 @@ public class JWTFilter extends OncePerRequestFilter {
         }
     }
 
+	/**
+	 * Check if the access token has been sent.
+	 * 
+	 * @param request request sent.
+	 * @return Access token.
+	 * @throws NullPointerException if access token not found.
+	 */
     private String retrieveToken(HttpServletRequest request) {
       var authorizationHeader = request.getHeader("Authorization");
       if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) 
@@ -59,7 +83,7 @@ public class JWTFilter extends OncePerRequestFilter {
     
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    	return Arrays.asList(SecurityConfigurations.permitAllPaths)
+    	return Arrays.asList(SecurityConfiguration.AUTH_WHITELIST)
     			.contains(request.getRequestURI());
     }
 }
