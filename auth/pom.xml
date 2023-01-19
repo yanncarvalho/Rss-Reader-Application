@@ -8,7 +8,7 @@
 		<version>3.0.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.dev.rssreader</groupId>
+	<groupId>br.dev.yann.rssreader</groupId>
 	<artifactId>auth</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>auth</name>
@@ -17,6 +17,23 @@
 		<java.version>17</java.version>
 		<spring-cloud.version>2022.0.0</spring-cloud.version>
 	</properties>
+	<profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+        	    <activeByDefault>true</activeByDefault>
+        	</activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+               <spring.profiles.active>prod</spring.profiles.active>
+        	 </properties>
+       	 </profile>
+	</profiles>
 	<dependencies>
 		
 		<dependency>
@@ -118,6 +135,8 @@
             <filtering>true</filtering>
           </resource>
         </resources>
+
+        
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

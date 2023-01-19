@@ -1,5 +1,20 @@
 package br.dev.yann.rssreader.auth.user;
 
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.ATTRIBUTE_UUID;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BEARER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_DELETE_USER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_DELETE_USER_AS_ADMIN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_FIND_USER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_FIND_USERS;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_FIND_USER_AS_ADMIN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_LOGIN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_SAVE;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_UPDATE_USER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_UPDATE_USER_AS_ADMIN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_CREATED;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_DELETED;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_UPDATED;
+
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +24,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import br.dev.yann.rssreader.auth.configuration.JwtService;
 import br.dev.yann.rssreader.auth.user.record.ControllerDefaultRes;
@@ -43,7 +56,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 /**
  * User Controller
- * 
+ *
  * @author Yann Carvalho
  */
 @RestController
@@ -57,20 +70,21 @@ public class UserController{
   private UserService service;
   
   /**
-   * {@link JwtService} instance
-   */
-  @Autowired 
-  private JwtService tokenService;
-  
-  /**
    * {@link AuthenticationManager} instance
    */
   @Autowired
   private AuthenticationManager manager;
   
 
+  /**
+   * {@link JwtService} instance
+   */
+  @Autowired
+  private JwtService tokenService;
+
+
   @Tag(name = "Admin")
-  @Operation(description =  "Get all Users as Admin")
+  @Operation(description =  SWAGGER_FIND_USERS)
   @GetMapping(value = "admin/findUsers", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
   public PageRes<FindByIdRes> findAll(
@@ -82,108 +96,86 @@ public class UserController{
     var pageImpl = new PageImpl<FindByIdRes>(userRes, usersFound.getPageable(), usersFound.getSize());
 	return new PageRes<>(pageImpl);
   }
-  
+
   @Tag(name = "Admin")
-  @Operation(description =  "Get a user by id as Admin")
+  @Operation(description = SWAGGER_FIND_USER_AS_ADMIN)
   @GetMapping(value = "admin/findUsers/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public FindByIdRes findByIdAsAdmin(@PathVariable("id") UUID id){
     var  user = service.findById(id);
-    if(user == null)
-    	throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
     return new FindByIdRes(user);
   }
-  
+
   @Tag(name = "Admin")
-  @Operation(description =  "Update one user as Admin")
+  @Operation(description =  SWAGGER_UPDATE_USER_AS_ADMIN)
   @PutMapping(value = "admin/update", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public ControllerDefaultRes updateAsAdmin(@Valid @RequestBody UpdateAsAdminReq update){
-    if(update.hasUsername() && service.isUsernameUsedByAnotherUser(update.username(), update.id())) 
-    	throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
-    
-
-    if(!service.existsById(update.id())) 
-    	throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The id informed was not found");
-    
-
     service.updateAsAdmin(update);
-    return new ControllerDefaultRes("User updated successfully");
+    return new ControllerDefaultRes(USER_UPDATED);
   }
-  
+
   @Tag(name = "Admin")
-  @Operation(description =  "Delete a user by id as Admin")
+  @Operation(description = SWAGGER_DELETE_USER_AS_ADMIN)
   @DeleteMapping(value = "admin/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public ControllerDefaultRes deleteAsAdmin(@PathVariable("id") UUID id) {
     service.deleteUser(id);
-    return new ControllerDefaultRes("User deleted successfully!");
+    return new ControllerDefaultRes(USER_DELETED);
   }
-  
+
   @Tag(name = "User")
-  @Operation(description =  "Update a user by id")
+  @Operation(description =  SWAGGER_UPDATE_USER)
   @PutMapping(value = "update", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public JwtRes updade(@RequestAttribute(name = "userUUID") UUID id, @RequestBody @Valid UpdateReq update) {
-    if(update.hasUsername() && service.isUsernameUsedByAnotherUser(update.username(), id)) 
-    	throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
-    
+  public JwtRes updade(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id, @RequestBody @Valid UpdateReq update) {
     User user = service.update(update, id);
     return createJwtResponse(user);
   }
   @Tag(name = "User")
-  @Operation(description =  "Delete a user by id")
+  @Operation(description = SWAGGER_DELETE_USER)
   @DeleteMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public ControllerDefaultRes delete(@RequestAttribute(name = "userUUID")  UUID id){
-    if(!service.existsById(id))
-	    throw new ResponseStatusException( HttpStatus.NOT_FOUND, "The user was not found");
+  public ControllerDefaultRes delete(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id){
+
 	service.deleteUser(id);
-    return new ControllerDefaultRes("User deleted successfully!");
+    return new ControllerDefaultRes(USER_DELETED);
   }
-  
-  @Tag(name = "User")  
-  @Operation(description =  "Get a user by id")
+
+  @Tag(name = "User")
+  @Operation(description =  SWAGGER_FIND_USER)
   @GetMapping(value = "find", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public FindByIdReq findById(@RequestAttribute(name = "userUUID") UUID id) {
-	var user =  service.findById(id);  	
+  public FindByIdReq findById(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id) {
+	var user =  service.findById(id);
     return new FindByIdReq(user.getUsername(), user.getName());
   }
-  
-  @Tag(name = "Login") 
-  @Operation(description =  "Login")
+
+  @Tag(name = "Login")
+  @Operation(description =  SWAGGER_LOGIN)
   @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public JwtRes login(@Valid @RequestBody LoginReq login) {
-	  
-	UsernamePasswordAuthenticationToken token = new 
-			UsernamePasswordAuthenticationToken(
-					login.username(), 
-					login.password());
-				
-	Authentication authResult = manager.authenticate(token);
-	if(!authResult.isAuthenticated()) 
-	   throw new BadCredentialsException("Incorrect credentials");
-	
+	UsernamePasswordAuthenticationToken token = 
+			new	UsernamePasswordAuthenticationToken(
+						login.username(),
+						login.password());
 
-	User user = (User) authResult.getPrincipal();
+	Authentication authResult = manager.authenticate(token);
+	var user = (User) authResult.getPrincipal();
 	return createJwtResponse(user);
   }
-  
-  @Tag(name = "New User") 
-  @Operation(description = "Save new user")
+
+
+  @Tag(name = "New User")
+  @Operation(description = SWAGGER_SAVE)
   @PostMapping(value = "save", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public ControllerDefaultRes save(@RequestBody @Valid SaveReq save){
-    if (service.hasUsername(save.username())) 
-    	throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
-   
     service.save(save);
-    return new ControllerDefaultRes("User created!");
-
+    return new ControllerDefaultRes(USER_CREATED);
   }
-  
+
   /**
    * Create a JWT Response
    * @param user {@link User user} to be used in the JWT encoding
@@ -193,7 +185,7 @@ public class UserController{
 	 var tokenJWT = tokenService.encode(user);
      var exp = tokenService.decode(tokenJWT).getExpirationTime();
 
-      return new JwtRes (tokenJWT, "Bearer", exp);
+      return new JwtRes (tokenJWT, JWT_BEARER, exp);
   }
 
 }

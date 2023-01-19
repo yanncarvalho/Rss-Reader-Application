@@ -1,5 +1,9 @@
 package br.dev.yann.rssreader.auth.configuration;
 
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.ATTRIBUTE_UUID;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BEARER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BEARER_NOT_FOUND;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -21,12 +25,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * JWT validation filter, this class extends {@link OncePerRequestFilter}.
- * 
+ *
  * @author Yann Carvalho
  */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-	
+
     /**
      * Handler Exception Resolver
      * @see HandlerExceptionResolver
@@ -34,33 +38,33 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
-	
+
     /**
      * User Service
      * @see UserService
      */
     @Autowired
     private UserService userService;
-    
+
     /**
      * JWT service to encode and decode.
      * @see JwtService
      */
     @Autowired
     private JwtService tokenService;
-    
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-       
+
         try {
                var tokenJWT = retrieveToken(request);
                var subject = tokenService.decode(tokenJWT).getSubject();
                var id = UUID.fromString(subject);
                var user = userService.findById(id);
-               request.setAttribute("userUUID", id);
+               request.setAttribute(ATTRIBUTE_UUID, id);
                var authentication = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
-               SecurityContextHolder.getContext().setAuthentication(authentication);    
+               SecurityContextHolder.getContext().setAuthentication(authentication);
         	   filterChain.doFilter(request, response);
          } catch (Exception err) {
         	 resolver.resolveException(request, response, null, err);
@@ -69,19 +73,19 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	/**
 	 * Check if the access token has been sent.
-	 * 
+	 *
 	 * @param request request sent.
 	 * @return Access token.
 	 * @throws NullPointerException if access token not found.
 	 */
     private String retrieveToken(HttpServletRequest request) {
       var authorizationHeader = request.getHeader("Authorization");
-      if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) 
-        	throw new NullPointerException("Bearer token authentication was not found");
-       
-       return authorizationHeader.replace("Bearer ", "");
+      if (authorizationHeader == null || !authorizationHeader.startsWith(JWT_BEARER + " "))
+        	throw new NullPointerException(JWT_BEARER_NOT_FOUND);
+
+       return authorizationHeader.replace(JWT_BEARER + " ", "");
     }
-    
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return Arrays.stream(SecurityConfig.AUTH_WHITELIST).anyMatch(

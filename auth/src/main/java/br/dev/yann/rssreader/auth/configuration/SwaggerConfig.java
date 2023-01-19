@@ -1,5 +1,9 @@
 package br.dev.yann.rssreader.auth.configuration;
 
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.APP_LICENSE;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BEARER;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SWAGGER_SECURITY_DESCRIPTION;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,41 +18,35 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 /**
  * Swagger configurations
- * 
+ *
  * @author Yann Carvalho
  */
 @Configuration
 public class SwaggerConfig {
-	
+
 	/**
 	 * Swagger Title
 	 */
 	@Value("${spring.application.name}")
 	private String title;
-	
+
 	/**
 	 * Application version
 	 */
-    @Value("${application.version}") 
+    @Value("${application.version}")
     private String version;
-    
+
 	/**
 	 * Security Scheema
 	 */
     private String securitySchema = "bearerAuth";
-    
+
 	/**
-	 * Description when read about security
+	 * Application license link
 	 */
-    private String securityDescription = 
-    		"Provide the JWT token. JWT token can be obtained from the Login API.";
-    
-	/**
-	 * Application license URL
-	 */
-    private String licenseUrl = 
-    		"https://github.com/yanncarvalho/rss-reader-application/blob/main/LICENSE";
-    
+    private String licenseUrl = APP_LICENSE;
+   
+
     /**
      * Configure the OpenAPI components.
      *
@@ -69,14 +67,14 @@ public class SwaggerConfig {
                          .addSecuritySchemes(securitySchema, new SecurityScheme()
                                  .name(securitySchema)
                                  .type(SecurityScheme.Type.HTTP)
-                                 .scheme("bearer")
-                                 .description(securityDescription)
+                                 .scheme(JWT_BEARER.toLowerCase())
+                                 .description(SWAGGER_SECURITY_DESCRIPTION)
                                  .bearerFormat("JWT")));
     }
-    
 
-            
-    
+
+
+
 }
 
 

@@ -20,26 +20,26 @@ import br.dev.yann.rssreader.auth.user.UserRole;
 
 /**
  * Application security configuration
- * 
+ *
  * @author Yann Carvalho
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
+
 	/**
-	 * Swagger Whitelist 
+	 * Swagger Whitelist
 	 */
 	static final String[] SWAGGER_WHITELIST = {
 			  "/swagger-ui/**",
 			  "/swagger-ui.html",
 			  "/v3/api-docs/**",
-			  "/swagger-ui.html/**", 
-			  "/configuration/**", 
+			  "/swagger-ui.html/**",
+			  "/configuration/**",
 			  "/swagger-resources/**",
 			  "/webjars/**"
-	}; 
-	
+	};
+
 	/**
 	 * Controller whitelist
 	 */
@@ -47,38 +47,38 @@ public class SecurityConfig {
     		"/v*/save",
 			"/v*/login"
 	};
-	
+
 	/**
-	 * All elements of Whitelist 
+	 * All elements of Whitelist
 	 */
-	static final String[] AUTH_WHITELIST =
-			ArrayUtils.addAll(CONTROLLER_WHITELIST, 
-							  SWAGGER_WHITELIST);
+	static final String[] AUTH_WHITELIST = ArrayUtils.addAll(
+			CONTROLLER_WHITELIST,
+			SWAGGER_WHITELIST);
 	/**
-	 * System admin role paths 
+	 * System admin role paths
 	 */
     static final String[] AUTH_ADMIN = {
 			"/v*/admin/**"
 	};
-    
+
     /**
      * JWT Filter
      * @see JwtFilter
      */
     @Autowired
     private JwtFilter jwtFilter;
-    
+
     /**
-     * Handler Exception Filter 
+     * Handler Exception Filter
  	 * @see ExceptionFilter
      */
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
-    
+
     /**
      * Security filter chain setup.
-     * @param httpSecurity the httpSecurity allows configuring web based security for specific http requests. 
+     * @param httpSecurity the httpSecurity allows configuring web based security for specific http requests.
      * @return httpSecurity with filter chain setup.
      */
 	@Bean
@@ -88,14 +88,14 @@ public class SecurityConfig {
 				  .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				  .and().authorizeHttpRequests(
 						authorize -> authorize
-							.requestMatchers(AUTH_ADMIN).hasRole(UserRole.ADMIN.name())
-							.requestMatchers(CONTROLLER_WHITELIST).permitAll()
+							.requestMatchers(SecurityConfig.AUTH_ADMIN).hasRole(UserRole.ADMIN.name())
+							.requestMatchers(SecurityConfig.CONTROLLER_WHITELIST).permitAll()
 							.anyRequest().authenticated())
 				  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 				  .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
 				  .and().build();
 	}
-	
+
     /**
      * Authentication manager setup.
      * @param configuration the authentication configuration.
@@ -105,7 +105,7 @@ public class SecurityConfig {
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-    
+
     /**
      * Authentication entry point setup.
      * @return {@link ExceptionFilter}.
@@ -115,16 +115,16 @@ public class SecurityConfig {
         return new ExceptionFilter();
     }
 
-    /** 
+    /**
      * Ignore the swagger endpoints in WebSecurity
-     * 
+     *
      * @return WebSecurityCustomizer with endpoints to ignore
-     */	
+     */
     @Bean
     WebSecurityCustomizer ignoringCustomizer() {
-        return web -> web.ignoring().requestMatchers(SWAGGER_WHITELIST);
+        return web -> web.ignoring().requestMatchers(SecurityConfig.SWAGGER_WHITELIST);
     }
-    
+
 
 
 }

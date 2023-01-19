@@ -1,5 +1,7 @@
 package br.dev.yann.rssreader.auth.user.record;
 
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BEARER;
+
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,9 +28,9 @@ public record JwtRes(
 	
 	/** 
 	 * Token type.
-	 * Usually with JWT this field is set as {@code "Bearer"}.
+	 * Usually with JWT this field is set as {@link DefaultValue#JWT_BEARE}.
 	 */	
-    @Schema(example = "token_type") 
+    @Schema(example = JWT_BEARER) 
 	@JsonProperty("token_type")
 	String tokenType,
 	

@@ -11,13 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
-import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
-
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SIZE_USER_USERNAME_MAX;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SIZE_FIELD_MAX;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,80 +22,69 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 /**
  * User is the representation of users data to persist in database.
- * 
+ *
  * @author Yann Carvalho
  */
 @Entity(name = "Users")
 @Table(name = "users")
 public class User implements UserDetails{
-	
+
   @Serial
   private static final long serialVersionUID = 1L;
-  
+
   /**
    *  Password encoders.
-   */	
-  @Transient @JsonIgnore 
-  private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+   */
+  @Transient
+  private static BCryptPasswordEncoder passwordEncoder = 
+  				new BCryptPasswordEncoder();
 
   /**
    * Unique user identification.
-   * 
+   *
    * @see UUID
-   */	
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @JsonSerialize(using = UUIDSerializer.class)
-  @JsonDeserialize(using = UUIDDeserializer.class)
   private UUID id;
 
   /**
    * User login name.
-   */	
-  @Column(name = "username", unique = true, nullable = false)
-  @NotBlank(message = "username must be informed.")
-  @Size(min = 3, max = 40, message = "username must be between {0} and {1} characters") 
+   */
+  @Column(name = "username", unique = true, 
+		  nullable = false,  length = SIZE_USER_USERNAME_MAX) 
   private String username;
 
   /**
    * Encrypted user password.
    */
-  @Column(nullable = false)
-  @NotBlank(message = "password must be informed.")
-  @Size(min = 3, max = 255, message = "password must be between {0} and {1} characters") 
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @Column(nullable = false, length = SIZE_FIELD_MAX)
   private String password;
 
   /**
    * User name.
    */
-  @Column(nullable = false)
-  @NotBlank(message = "name must be informed.")
-  @Size(min = 3, max = 255, message = "name must be between {0} and {1} characters") 
+  @Column(nullable = false, length = SIZE_FIELD_MAX)
   private String name;
 
   /**
-   * 
-   * User role. 
+   *
+   * User role.
    * <br>
    * By default role is {@link  RoleUser#USER User}.
    * @see UserRole
    */
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 255)
-  @NotNull(message = "role must be informed.")
+  @Column(nullable = false, length = SIZE_FIELD_MAX)
   private UserRole role = UserRole.USER;
 
   /**
    * Empty constructor.
    */
-  public User() {}	
+  public User() {}
 
   /**
    * Constructs a {@code User} with name, password and username as parameters.
@@ -113,14 +97,14 @@ public class User implements UserDetails{
     this.setPassword(password);
     this.username = username;
   }
-  
+
   /**
    * @return {@link #id}.
    */
   public UUID getId() {
 	return id;
   }
-  
+
   /**
    * @param password updates {@link #password}.
    */
@@ -141,7 +125,7 @@ public class User implements UserDetails{
   public String getName() {
 	return name;
   }
-  
+
   /**
    * @param name updates {@link #name}.
    */
@@ -155,25 +139,25 @@ public class User implements UserDetails{
   public UserRole getRole() {
 	return role;
   }
-  
+
   /**
    * Authenticate password.
    * @param password the raw password to authenticate.
    * @return {@code true} if authenticated, {@code false} if not.
-   * 
+   *
    * @see #password
    */
   public boolean authenticatePassword(String password) {
 	  return passwordEncoder.matches(this.password, password);
   }
-  
+
   /**
    * @param role updates {@link #role}.
    */
   public void setRole(UserRole role) {
 	this.role = role;
   }
-  
+
   /**
    * @return {@link #password}.
    */
@@ -181,7 +165,7 @@ public class User implements UserDetails{
   public String getPassword() {
 	 return password;
   }
-    
+
   /**
    * @return {@link #username}.
    */
@@ -189,7 +173,7 @@ public class User implements UserDetails{
   public String getUsername() {
   	return username;
   }
-   
+
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -210,7 +194,7 @@ public class User implements UserDetails{
   public boolean isCredentialsNonExpired() {
 	return false;
   }
-  
+
   @Override
   public boolean isEnabled() {
 	return true;
@@ -238,11 +222,11 @@ public class User implements UserDetails{
   @Override
   public String toString() {
 	return "User ["
-			+ "id=" + id 
-			+ ", username=" + username 
-			+ ", password=" + password 
-			+ ", name=" + name 
-			+ ", role="	+ role 
+			+ "id=" + id
+			+ ", username=" + username
+			+ ", password=" + password
+			+ ", name=" + name
+			+ ", role="	+ role
 			+ "]";
   }
 

@@ -1,5 +1,7 @@
 package br.dev.yann.rssreader.auth.configuration;
 
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.INCORRET_CREDENTIALS;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,7 +14,8 @@ import br.dev.yann.rssreader.auth.user.User;
 import br.dev.yann.rssreader.auth.user.UserService;
 
 /**
- * Authentication provider, this class implements {@link AuthenticationProvider}.
+ * Authentication provider, this class implements
+ * {@link AuthenticationProvider}.
  * 
  * @author Yann Carvalho
  */
@@ -21,11 +24,12 @@ public class AuthProvider implements AuthenticationProvider {
 
 	/**
 	 * User service.
+	 * 
 	 * @see UserService
 	 */
 	@Autowired
-	private UserService userService; 
-	
+	private UserService userService;
+
 	/**
 	 * @throws BadCredentialsException if password is not valid.
 	 */
@@ -33,17 +37,17 @@ public class AuthProvider implements AuthenticationProvider {
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String username = authentication.getPrincipal().toString();
 		String password = authentication.getCredentials().toString();
-		var user =  (User) userService.loadUserByUsername(username);
-	
-		if(user.authenticatePassword(password)) {
-			throw new BadCredentialsException("Incorrect credentials");
+		var user = (User) userService.loadUserByUsername(username);
+
+		if (user.authenticatePassword(password)) {
+			throw new BadCredentialsException(INCORRET_CREDENTIALS);
 		}
 		return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
 	}
 
 	@Override
 	public boolean supports(Class<?> authentication) {
-		 return authentication.equals(UsernamePasswordAuthenticationToken.class);
+		return authentication.equals(UsernamePasswordAuthenticationToken.class);
 	}
 
 }
