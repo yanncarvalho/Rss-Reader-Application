@@ -30,7 +30,7 @@ import br.dev.yann.rssreader.auth.user.User;
  * @author Yann Carvalho
  */
 @Service
-public class JWTService {
+public class JwtService {
 
   /**
    * Token duration in days.
@@ -130,7 +130,7 @@ public class JWTService {
 	        return claims;
 	      } catch (ParseException | JOSEException e) {
 	          throw new BadJwtException("Error validating JWT", e);
-	      }
+	 }
   }
   
 }

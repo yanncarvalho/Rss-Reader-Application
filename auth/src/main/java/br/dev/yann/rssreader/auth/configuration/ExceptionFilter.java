@@ -31,14 +31,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author Yann Carvalho
  */
 @RestControllerAdvice
-public class ExceptionFilter extends Http403ForbiddenEntryPoint {
-	
+public class ExceptionFilter extends Http403ForbiddenEntryPoint  {
+
 	/**
 	 * The most generic handler. It is call when {@link Exception} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return  error reason: 'An internal server error occurred, contact system administrator.',
-	 * 			{@link Exception#getMessage error message} wrapped in a {@link List}
+	 * @return  message: 'An internal server error occurred, contact system administrator.',
+	 * 			errors: {@link Exception#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#INTERNAL_SERVER_ERROR}.
 	 */
 	@ExceptionHandler(Exception.class)
@@ -52,23 +52,23 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link ResponseStatusException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return {@link ResponseStatusException#getReason error reason}, 
-	 * 			{@link ResponseStatusException#getMessage error message} wrapped in a {@link List}
+	 * @return  message: 'Cannot proceed.',
+	 * 			errors: {@link ResponseStatusException#getReason error message} wrapped in a {@link List}
 	 *          and {@link ResponseStatusException#getResponseHeaders http status}.
 	 */
 	@ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorRes> processResponseStatusException(ResponseStatusException ex)  {
 	   return ResponseEntity
 			   .status(ex.getStatusCode())
-			   .body(new ErrorRes(ex.getReason(), ex.getMessage()));
+			   .body(new ErrorRes("Cannot proceed.",ex.getReason()));
     }
 	
 	/**
 	 * It is call when {@link UsernameNotFoundException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'User not found.',
-	 * 		   {@link UsernameNotFoundException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'User not found.',
+	 * 		    errors: {@link UsernameNotFoundException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
 	 */
 	@ExceptionHandler(UsernameNotFoundException.class)
@@ -82,8 +82,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link MethodArgumentNotValidException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'Request is not valid',
-	 * 			{@link MethodArgumentNotValidException#getBindingResult error message} 
+	 * @return 	message: 'Request is not valid',
+	 * 			errors: {@link MethodArgumentNotValidException#getBindingResult error message} 
 	 * 			wrapped in a {@link List}  of String
 	 *          and http status:  {@link HttpStatus#BAD_REQUEST}.
 	 */
@@ -104,8 +104,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link SingleUserAdminException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'User is the only admin of the system',
-	 * 			{@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'User is the only admin of the system',
+	 * 			errors: {@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#CONFLICT}.
 	 */
 	@ExceptionHandler(SingleUserAdminException.class)
@@ -118,8 +118,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link BadJwtException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'Bad JWT',
-	 * 			{@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'Bad JWT',
+	 * 			errors: {@link SingleUserAdminException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
 	 */
 	@ExceptionHandler(BadJwtException.class)
@@ -132,8 +132,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link JwtEncodingException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'Not possible to encode JWT',
-	 * 			{@link JwtEncodingException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'Not possible to encode JWT',
+	 * 			errors: {@link JwtEncodingException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#INTERNAL_SERVER_ERROR}.
 	 */
 	@ExceptionHandler(JwtEncodingException.class)
@@ -146,8 +146,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link BadCredentialsException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'Bad Credentials',
-	 * 			{@link BadCredentialsException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'Bad Credentials',
+	 * 			errors: {@link BadCredentialsException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
 	 */
 	@ExceptionHandler(BadCredentialsException.class)
@@ -160,8 +160,8 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 * It is call when {@link NullPointerException} is thrown.
 	 * @param ex error thrown.
 	 * 
-	 * @return 	error reason: 'Data are null',
-	 * 			{@link NullPointerException#getMessage error message} wrapped in a {@link List}
+	 * @return 	message: 'Data are null',
+	 * 			errors: {@link NullPointerException#getMessage error message} wrapped in a {@link List}
 	 *          and http status: {@link HttpStatus#UNAUTHORIZED}.
 	 */
 	@ExceptionHandler(NullPointerException.class)
@@ -171,16 +171,22 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
     }
 
 	/**
-	 * It is call when request fail in {@link SecurityConfiguration}
-	 * @return error reason: 'Access forbidden',
-	 * 		   {@link AuthenticationException#getMessage error message} wrapped in a {@link List}
-	 *         and http status: {@link HttpStatus#FORBIDDEN}.
+	 * It is call when request fail in {@link SecurityConfig}
+	 * @return message: 'Access forbidden' || 'Not found.' , 
+	 * 		   errors: {@link AuthenticationException#getMessage error message} || 
+	 * 		   'URL not found.' wrapped in a {@link List}
+	 *         and http status: {@link HttpServletResponse#getStatus}.
 	 */
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse res,
 	    AuthenticationException authException) throws IOException {
 		res.setContentType("application/json;charset=UTF-8");
-	    res.setStatus(HttpStatus.FORBIDDEN.value());
+	    if(res.getStatus() == HttpStatus.NOT_FOUND.value()) {
+	  	    res.getWriter().write(new ObjectMapper().writeValueAsString(
+	  	    	 new ErrorRes("Not found.", "URL not found."))
+	  	     );
+	  	    return;
+	    }
 	    res.getWriter().write(new ObjectMapper().writeValueAsString(
 	    	 new ErrorRes("Access forbidden.", authException.getMessage())
 	     ));

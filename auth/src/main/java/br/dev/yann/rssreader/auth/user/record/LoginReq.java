@@ -3,6 +3,7 @@ package br.dev.yann.rssreader.auth.user.record;
 import java.util.Objects;
 
 import br.dev.yann.rssreader.auth.user.UserController;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -15,10 +16,12 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record LoginReq(
 	  /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#username username} */
+	  @Schema(example = "username") 
 	  @NotBlank
 	  String username,	
 	 
 	  /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#password password} */
+	  @Schema(example = "password") 
 	  @NotBlank
 	  String password) {
 

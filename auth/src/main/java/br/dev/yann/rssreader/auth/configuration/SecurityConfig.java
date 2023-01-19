@@ -1,5 +1,6 @@
 package br.dev.yann.rssreader.auth.configuration;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import br.dev.yann.rssreader.auth.user.UserRole;
@@ -23,39 +25,48 @@ import br.dev.yann.rssreader.auth.user.UserRole;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration {
+public class SecurityConfig {
 	
 	/**
-	 * System WhiteList 
+	 * Swagger Whitelist 
 	 */
-	static final String[] AUTH_WHITELIST = {
-    		"/save",
-			"/login",
-			"/swagger-ui",
-			"/favicon.ico",
-			"/swagger-ui.html",
-			"/api-docs",
-            // -- Swagger UI v2
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/**",
-            // -- Swagger UI v3 (OpenAPI)
-            "/v2/api-docs",
-            "/v3/api-docs",  
-            "/swagger-resources/**", 
-            "/swagger-ui/**",
-            // other public endpoints of your API may be appended to this array
-    };
+	static final String[] SWAGGER_WHITELIST = {
+			  "/swagger-ui/**",
+			  "/swagger-ui.html",
+			  "/v3/api-docs/**",
+			  "/swagger-ui.html/**", 
+			  "/configuration/**", 
+			  "/swagger-resources/**",
+			  "/webjars/**"
+	}; 
 	
+	/**
+	 * Controller whitelist
+	 */
+	static final String[] CONTROLLER_WHITELIST = {
+    		"/v*/save",
+			"/v*/login"
+	};
+	
+	/**
+	 * All elements of Whitelist 
+	 */
+	static final String[] AUTH_WHITELIST =
+			ArrayUtils.addAll(CONTROLLER_WHITELIST, 
+							  SWAGGER_WHITELIST);
 	/**
 	 * System admin role paths 
 	 */
     static final String[] AUTH_ADMIN = {
-			"/admin/**"
+			"/v*/admin/**"
 	};
+    
+    /**
+     * JWT Filter
+     * @see JwtFilter
+     */
+    @Autowired
+    private JwtFilter jwtFilter;
     
     /**
      * Handler Exception Filter 
@@ -78,8 +89,9 @@ public class SecurityConfiguration {
 				  .and().authorizeHttpRequests(
 						authorize -> authorize
 							.requestMatchers(AUTH_ADMIN).hasRole(UserRole.ADMIN.name())
-							.requestMatchers(AUTH_WHITELIST).permitAll()
+							.requestMatchers(CONTROLLER_WHITELIST).permitAll()
 							.anyRequest().authenticated())
+				  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 				  .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
 				  .and().build();
 	}
@@ -102,11 +114,18 @@ public class SecurityConfiguration {
     AuthenticationEntryPoint authenticationEntryPoint(){
         return new ExceptionFilter();
     }
-    
+
+    /** 
+     * Ignore the swagger endpoints in WebSecurity
+     * 
+     * @return WebSecurityCustomizer with endpoints to ignore
+     */	
     @Bean
-    WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(AUTH_WHITELIST);
+    WebSecurityCustomizer ignoringCustomizer() {
+        return web -> web.ignoring().requestMatchers(SWAGGER_WHITELIST);
     }
+    
+
 
 }
 

@@ -3,6 +3,7 @@ package br.dev.yann.rssreader.auth.user.record;
 import java.util.UUID;
 
 import br.dev.yann.rssreader.auth.user.UserRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 import br.dev.yann.rssreader.auth.user.User;
 import br.dev.yann.rssreader.auth.user.UserController;
 
@@ -20,12 +21,15 @@ public record FindByIdRes(
 		/**Representantion of {@link User#id id} */
 		UUID id,
 		
+		 @Schema(example = "username") 
 		/**Representantion of {@link User#username username} */
 	    String username,
 	    
+		 @Schema(example = "name") 
 		/**Representantion of {@link User#name name} */
 	    String name,
 	    
+		 @Schema(example = "USER") 
 		/**Representantion of {@link User#role role} */
 	    UserRole role) {
 	

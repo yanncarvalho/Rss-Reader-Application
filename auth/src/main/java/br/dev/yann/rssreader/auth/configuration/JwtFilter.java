@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -24,7 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author Yann Carvalho
  */
 @Component
-public class JWTFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 	
     /**
      * Handler Exception Resolver
@@ -43,10 +44,10 @@ public class JWTFilter extends OncePerRequestFilter {
     
     /**
      * JWT service to encode and decode.
-     * @see JWTService
+     * @see JwtService
      */
     @Autowired
-    private JWTService tokenService;
+    private JwtService tokenService;
     
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -83,7 +84,7 @@ public class JWTFilter extends OncePerRequestFilter {
     
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    	return Arrays.asList(SecurityConfiguration.AUTH_WHITELIST)
-    			.contains(request.getRequestURI());
+        return Arrays.stream(SecurityConfig.AUTH_WHITELIST).anyMatch(
+        		     e -> new AntPathMatcher().match(e, request.getServletPath()));
     }
 }

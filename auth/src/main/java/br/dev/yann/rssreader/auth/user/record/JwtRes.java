@@ -4,6 +4,8 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * JWT response record.
  *
@@ -13,11 +15,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author Yann Carvalho
  */
-public record JWTRes(
+public record JwtRes(
 	/** 
 	 * Token generated.
-	 * @see JWTService
+	 * @see JwtService
 	 */	
+    @Schema(example = "token") 
 	@JsonProperty("access_token")
 	String token,
 	
@@ -25,12 +28,13 @@ public record JWTRes(
 	 * Token type.
 	 * Usually with JWT this field is set as {@code "Bearer"}.
 	 */	
+    @Schema(example = "token_type") 
 	@JsonProperty("token_type")
 	String tokenType,
 	
 	/** 
 	 * When token will expire.
-	 * @see JWTService
+	 * @see JwtService
 	 */	
 	@JsonProperty("expires_in")
 	Date expirateTime) {}

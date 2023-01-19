@@ -65,7 +65,7 @@ public class User implements UserDetails{
    */	
   @Column(name = "username", unique = true, nullable = false)
   @NotBlank(message = "username must be informed.")
-  @Size(min = 3, max = 255, message = "username must be between {0} and {1} characters") 
+  @Size(min = 3, max = 40, message = "username must be between {0} and {1} characters") 
   private String username;
 
   /**

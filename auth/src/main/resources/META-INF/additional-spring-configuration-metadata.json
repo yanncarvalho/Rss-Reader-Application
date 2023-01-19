@@ -7,26 +7,32 @@
   {
     "name": "jwt.token.secret",
     "type": "java.lang.String",
-    "description": "JWT Secret key"
+    "description": "JWT secret key"
   },
   {
     "name": "jwt.token.issuer",
     "type": "java.lang.String",
-    "description": "JWT Issuer"
+    "description": "JWT issuer"
   },
   {
     "name": "flyway.password",
     "type": "java.lang.String",
-    "description": "database password for flyway migration"
+    "description": "Database password for flyway migration"
   },
   {
     "name": "flyway.user",
     "type": "java.lang.String",
-    "description": "database user for flyway migration"
+    "description": "Database user for flyway migration"
   },
   {
     "name": "flyway.url",
     "type": "java.lang.String",
-    "description": "database url for flyway migration"
+    "description": "Database url for flyway migration"
+  },
+  {
+    "name": "application.version",
+    "type": "java.lang.String",
+    "description": "Application version"
   }
+
 ]}

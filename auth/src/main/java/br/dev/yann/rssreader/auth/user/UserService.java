@@ -16,6 +16,8 @@ import br.dev.yann.rssreader.auth.user.record.UpdateReq;
 
 /**
  * User Service
+ * 
+ * @author Yann Carvalho
  */
 @Service
 public class UserService implements UserDetailsService{

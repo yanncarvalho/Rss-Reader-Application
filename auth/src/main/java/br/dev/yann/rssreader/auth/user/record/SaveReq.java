@@ -3,6 +3,7 @@ package br.dev.yann.rssreader.auth.user.record;
 import java.util.Objects;
 
 import br.dev.yann.rssreader.auth.user.UserController;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -18,20 +19,23 @@ import jakarta.validation.constraints.Size;
  */
 public record SaveReq(
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#username username} */
+	 @Schema(example = "username") 
 	 @Size(min = 3, max = 255) @NotBlank
 	 @Pattern(regexp = "^[A-Z0-9_\\.]+$") 
 	 String username,
 	 
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#password password} */
+	 @Schema(example = "password") 
 	 @Size(min = 3, max = 255) @NotBlank
 	 String password,
 	 
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#name name} */
+	 @Schema(example = "name") 
 	 @Size(min = 3, max = 255) @NotBlank
 	 String name) {
 	
 	/**
-	 * Constructs a {@code SaveReq} with a username, password and name as parameters
+	 * Constructs a {@code SaveReq} with username, password and name as parameters
 	 * @param username username username is converted to uppercase and updates {@link #username} 
 	 * @param password the password updates {@link #password} 
 	 * @param name the name updates {@link #name} 
