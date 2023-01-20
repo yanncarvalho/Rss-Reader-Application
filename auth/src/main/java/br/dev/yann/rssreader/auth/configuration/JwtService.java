@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.JwtEncodingException;
@@ -17,12 +19,9 @@ import org.springframework.stereotype.Service;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 
@@ -35,25 +34,35 @@ import br.dev.yann.rssreader.auth.user.User;
  */
 @Service
 public class JwtService {
-
+	
 	/**
-	 * Token duration in days.
+	 * Token expiry time in days
 	 */
 	@Value("${jwt.token.duration-in-days}")
 	private int expiryTime;
 
 	/**
-	 * Token secret. The secret must be at least 256 bits long and not {@code null}.
+	 * Token Secret
 	 */
-	@Value("${jwt.token.secret}")
-	private String secret;
+	private byte [] secret;
 
 	/**
 	 * Application issuer.
 	 */
-	@Value("${jwt.token.issuer}")
+	@Value("${jwt.token.issuer : ''}")
 	private String issuer;
-
+	
+	/**
+	 * Construct
+	 * 
+	 * @param secret value used to calculate a SHA256 digest and assign the value to {@link #secret}
+	 * 
+	 * @see DigestUtils#sha256
+	 */
+	public JwtService(@Value("${jwt.token.secret}") String secret) {
+		this.secret = DigestUtils.sha256(secret);
+	}
+	
 	/**
 	 * <p>
 	 * Encode JWT.
@@ -83,9 +92,9 @@ public class JwtService {
 										   .subject(user.getId().toString())
 										   .expirationTime(Date.from(instantExpiration))
 										   .build();
-			var signer = new MACSigner(secret.getBytes());
+			
 			var signedJWT = new SignedJWT(header, playload);
-			signedJWT.sign(signer);
+			signedJWT.sign(new MACSigner(secret));
 
 			return signedJWT.serialize();
 
@@ -95,42 +104,28 @@ public class JwtService {
 	}
 
 	/**
-	 * Checks the signature of Token with the specified verifier.
-	 *
-	 * @param token  token.
-	 * @param secret {@link secret token secret}.
-	 * @return {@code true} if token is valid {@code false} if is not.
-	 *
-	 */
-	private boolean isTokenValid(String token, byte[] secret) throws ParseException, JOSEException {
-		JWSObject jwsObject = JWSObject.parse(token);
-		JWSVerifier verifier = new MACVerifier(secret);
-		return jwsObject.verify(verifier);
-	}
-
-	/**
 	 * Decode token.
 	 *
 	 * @param token token.
 	 * @return {@link JWTClaimsSet} with JWT specification.
 	 * @throws BadJwtException if token does not have any claim set correctly as in
-	 *                         {@link #encode} or {@link #isTokenValid is token not
-	 *                         valid}.
+	 *                         {@link #encode} or the signature of Token is not valid.
 	 */
 	public JWTClaimsSet decode(String token) {
 		try {
-			JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
-
+  			var jwt = SignedJWT.parse(token);
+  			
+			var claims = JWTClaimsSet.parse(jwt.getPayload().toJSONObject());
 			var exp = claims.getExpirationTime();
-			var instantNow = Instant.now().atOffset(ZoneOffset.UTC);
+			var instantNow = Instant.now().atOffset(ZoneOffset.UTC);	
 
-			if ((exp == null || exp.toInstant().atOffset(ZoneOffset.UTC).isAfter(instantNow))
-					&& (claims.getIssuer() == null || !claims.getIssuer().equals(issuer)) 
-					&& claims.getSubject() == null
-					&& !isTokenValid(token, secret.getBytes())) {
+			if (exp == null || exp.toInstant().atOffset(ZoneOffset.UTC).isAfter(instantNow)
+				|| claims.getIssuer() == null || !claims.getIssuer().equals(issuer) 
+				|| StringUtils.isBlank(claims.getSubject())
+				|| !jwt.verify(new MACVerifier(secret))) {
 				throw new JOSEException();
 			}
-
+			
 			return claims;
 		} catch (ParseException | JOSEException e) {
 			throw new BadJwtException(JWT_BAD_EXCEPTION, e);

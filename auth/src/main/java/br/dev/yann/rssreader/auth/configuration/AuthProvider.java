@@ -22,11 +22,7 @@ import br.dev.yann.rssreader.auth.user.UserService;
 @Component
 public class AuthProvider implements AuthenticationProvider {
 
-	/**
-	 * User service.
-	 * 
-	 * @see UserService
-	 */
+
 	@Autowired
 	private UserService userService;
 
@@ -39,7 +35,7 @@ public class AuthProvider implements AuthenticationProvider {
 		String password = authentication.getCredentials().toString();
 		var user = (User) userService.loadUserByUsername(username);
 
-		if (user.authenticatePassword(password)) {
+		if (!user.authenticatePassword(password)) {
 			throw new BadCredentialsException(INCORRET_CREDENTIALS);
 		}
 		return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());

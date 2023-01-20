@@ -23,11 +23,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-/**
- * User is the representation of users data to persist in database.
- *
- * @author Yann Carvalho
- */
 @Entity(name = "Users")
 @Table(name = "users")
 public class User implements UserDetails{
@@ -36,7 +31,7 @@ public class User implements UserDetails{
   private static final long serialVersionUID = 1L;
 
   /**
-   *  Password encoders.
+   *  Password encoder.
    */
   @Transient
   private static BCryptPasswordEncoder passwordEncoder = 
@@ -148,7 +143,7 @@ public class User implements UserDetails{
    * @see #password
    */
   public boolean authenticatePassword(String password) {
-	  return passwordEncoder.matches(this.password, password);
+	  return passwordEncoder.matches(password, this.password);
   }
 
   /**

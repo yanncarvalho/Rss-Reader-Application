@@ -18,17 +18,9 @@ import br.dev.yann.rssreader.auth.user.record.SaveReq;
 import br.dev.yann.rssreader.auth.user.record.UpdateAsAdminReq;
 import br.dev.yann.rssreader.auth.user.record.UpdateReq;
 
-/**
- * User Service
- *
- * @author Yann Carvalho
- */
 @Service
 public class UserService implements UserDetailsService{
 
-  /**
-   * {@link UserRepository} Instance
-   */
   @Autowired
   private UserRepository repository;
 
@@ -142,8 +134,6 @@ public class UserService implements UserDetailsService{
 
 	repository.save(user);
   }
-
-
 
   /**
    * Find user by id.

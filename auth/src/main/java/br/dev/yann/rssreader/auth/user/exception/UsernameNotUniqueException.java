@@ -15,7 +15,8 @@ public class UsernameNotUniqueException extends RuntimeException{
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a {@code UserUsernameNotUnique} with {@link br.dev.yann.rssreader.auth.configuration.DefaultValue#EXCEPTION_USER_USERNAME_NOT_UNIQUE default message}.
+	 * Constructs a {@code UserUsernameNotUnique} with 
+	 * {@link br.dev.yann.rssreader.auth.configuration.DefaultValue#EXCEPTION_USER_USERNAME_NOT_UNIQUE default message}.
 	 */
 	public UsernameNotUniqueException() {
 		super(EXCEPTION_USER_USERNAME_NOT_UNIQUE);

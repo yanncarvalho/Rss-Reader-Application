@@ -35,8 +35,8 @@
     "description": "Application version"
   },
   {
-    "name": "flyway.defaultSchema",
+    "name": "flyway.default-schema",
     "type": "java.lang.String",
-    "description": "Flyway schema"
+    "description":  "Flyway schema"
   }
 ]}

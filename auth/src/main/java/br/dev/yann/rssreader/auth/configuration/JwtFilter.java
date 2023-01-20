@@ -31,25 +31,16 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    /**
-     * Handler Exception Resolver
-     * @see HandlerExceptionResolver
-     */
+ 
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 
-    /**
-     * User Service
-     * @see UserService
-     */
+ 
     @Autowired
     private UserService userService;
-
-    /**
-     * JWT service to encode and decode.
-     * @see JwtService
-     */
+    
+   
     @Autowired
     private JwtService tokenService;
 
@@ -66,8 +57,8 @@ public class JwtFilter extends OncePerRequestFilter {
                var authentication = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
                SecurityContextHolder.getContext().setAuthentication(authentication);
         	   filterChain.doFilter(request, response);
-         } catch (Exception err) {
-        	 resolver.resolveException(request, response, null, err);
+         } catch (Exception ex) {
+        	 resolver.resolveException(request, response, null, ex);
         }
     }
 
@@ -89,6 +80,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return Arrays.stream(SecurityConfig.AUTH_WHITELIST).anyMatch(
-        		     e -> new AntPathMatcher().match(e, request.getServletPath()));
+        		     element -> new AntPathMatcher().match(element, request.getServletPath()));
     }
 }

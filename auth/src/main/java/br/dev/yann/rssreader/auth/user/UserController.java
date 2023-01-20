@@ -53,32 +53,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 
-
-/**
- * User Controller
- *
- * @author Yann Carvalho
- */
 @RestController
 @RequestMapping("v1")
 public class UserController{
-
-  /**
-   * {@link UserService} instance
-   */
+ 
   @Autowired
   private UserService service;
-  
-  /**
-   * {@link AuthenticationManager} instance
-   */
+
   @Autowired
   private AuthenticationManager manager;
   
 
-  /**
-   * {@link JwtService} instance
-   */
   @Autowired
   private JwtService tokenService;
 

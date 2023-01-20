@@ -18,7 +18,8 @@ public class UserSingleAdminException  extends RuntimeException{
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a {@code OnlyAdminException} with default message.
+	 * Constructs a {@code OnlyAdminException} with  
+	 * {@link br.dev.yann.rssreader.auth.configuration.DefaultValue#EXCEPTION_SINGLE_USER_ADMIN default message}.
 	 */
 	public UserSingleAdminException() {
 		super(EXCEPTION_SINGLE_USER_ADMIN);

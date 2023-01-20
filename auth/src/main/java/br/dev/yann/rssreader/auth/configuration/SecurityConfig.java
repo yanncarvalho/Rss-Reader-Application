@@ -18,20 +18,14 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import br.dev.yann.rssreader.auth.user.UserRole;
 
-/**
- * Application security configuration
- *
- * @author Yann Carvalho
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-	/**
-	 * Swagger Whitelist
-	 */
+
 	static final String[] SWAGGER_WHITELIST = {
 			  "/swagger-ui/**",
+			  "/swagger-ui",
 			  "/swagger-ui.html",
 			  "/v3/api-docs/**",
 			  "/swagger-ui.html/**",
@@ -40,38 +34,29 @@ public class SecurityConfig {
 			  "/webjars/**"
 	};
 
-	/**
-	 * Controller whitelist
-	 */
+
 	static final String[] CONTROLLER_WHITELIST = {
     		"/v*/save",
 			"/v*/login"
 	};
 
+
+    static final String[] AUTH_ADMIN = {
+			"/v*/admin/**"
+	};
+    
 	/**
 	 * All elements of Whitelist
 	 */
 	static final String[] AUTH_WHITELIST = ArrayUtils.addAll(
 			CONTROLLER_WHITELIST,
 			SWAGGER_WHITELIST);
-	/**
-	 * System admin role paths
-	 */
-    static final String[] AUTH_ADMIN = {
-			"/v*/admin/**"
-	};
 
-    /**
-     * JWT Filter
-     * @see JwtFilter
-     */
+  
     @Autowired
     private JwtFilter jwtFilter;
 
-    /**
-     * Handler Exception Filter
- 	 * @see ExceptionFilter
-     */
+ 
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
@@ -106,10 +91,7 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    /**
-     * Authentication entry point setup.
-     * @return {@link ExceptionFilter}.
-     */
+  
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint(){
         return new ExceptionFilter();
