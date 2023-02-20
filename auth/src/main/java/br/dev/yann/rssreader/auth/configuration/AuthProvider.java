@@ -33,12 +33,20 @@ public class AuthProvider implements AuthenticationProvider {
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String username = authentication.getPrincipal().toString();
 		String password = authentication.getCredentials().toString();
-		var user = (User) userService.loadUserByUsername(username);
-
-		if (!user.authenticatePassword(password)) {
+		try {
+			var user = (User) userService.loadUserByUsername(username);
+			
+			if (!user.authenticatePassword(password)) {
+				throw new Exception(INCORRET_CREDENTIALS);
+			}
+			return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
+		} catch(Exception e) {
 			throw new BadCredentialsException(INCORRET_CREDENTIALS);
 		}
-		return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
+
+
+		
+		
 	}
 
 	@Override

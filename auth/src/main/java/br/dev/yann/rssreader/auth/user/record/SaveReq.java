@@ -1,11 +1,11 @@
 package br.dev.yann.rssreader.auth.user.record;
 
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_NAME;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_NAME_MESSAGE;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_START_WITH_LETTERS;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_START_WITH_LETTERS_MESSAGE;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_USERNAME;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.BEAN_REGEX_USERNAME_MESSAGE;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.NAME_PATTERN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.NAME_PATTERN_ERROR_MSG;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.START_WITH_LETTERS_PATTERN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.START_WITH_LETTERS_PATTERN_ERROR_MSG;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USERNAME_PATTERN;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USERNAME_PATTERN_ERROR_MSG;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SIZE_FIELD_MAX;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SIZE_FIELD_MIN;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.SIZE_USER_USERNAME_MAX;
@@ -32,8 +32,8 @@ public record SaveReq(
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#username username} */
 	 @Schema(example = "username", description = SWAGGER_USERNAME_DESCRIPTION) 
 	 @Size(min = SIZE_FIELD_MIN, max = SIZE_USER_USERNAME_MAX)
-	 @Pattern(regexp = BEAN_REGEX_START_WITH_LETTERS, message = BEAN_REGEX_START_WITH_LETTERS_MESSAGE)
-	 @Pattern(regexp = BEAN_REGEX_USERNAME, message = BEAN_REGEX_USERNAME_MESSAGE) 
+	 @Pattern(regexp = START_WITH_LETTERS_PATTERN, message = START_WITH_LETTERS_PATTERN_ERROR_MSG)
+	 @Pattern(regexp = USERNAME_PATTERN, message = USERNAME_PATTERN_ERROR_MSG) 
 	 String username,
 	 
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#password password} */
@@ -44,8 +44,8 @@ public record SaveReq(
 	 /**Representantion of {@link br.dev.yann.rssreader.auth.user.User#name name} */
 	 @Schema(example = "name", description =  SWAGGER_NAME_DESCRIPTION) 
 	 @Size(min = SIZE_FIELD_MIN, max = SIZE_FIELD_MAX) 
-	 @Pattern(regexp = BEAN_REGEX_START_WITH_LETTERS, message = BEAN_REGEX_START_WITH_LETTERS_MESSAGE)
-	 @Pattern(regexp = BEAN_REGEX_NAME, message = BEAN_REGEX_NAME_MESSAGE) 
+	 @Pattern(regexp = START_WITH_LETTERS_PATTERN, message = START_WITH_LETTERS_PATTERN_ERROR_MSG)
+	 @Pattern(regexp = NAME_PATTERN, message = NAME_PATTERN_ERROR_MSG) 
 	 String name) {
 	
 	/**

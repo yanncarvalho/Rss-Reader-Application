@@ -10,9 +10,9 @@ import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_BAD;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.JWT_ENCODE_PROBLEM;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.NOT_FOUND;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.NOT_FOUND_URL;
+import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USERNAME_NOT_UNIQUE;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_NOT_FOUND;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_SINGLE_ADMIN;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USERNAME_NOT_UNIQUE;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -39,6 +39,7 @@ import br.dev.yann.rssreader.auth.user.exception.UserSingleAdminException;
 import br.dev.yann.rssreader.auth.user.exception.UsernameNotUniqueException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * Handle Exception in the application, extends {@link Http403ForbiddenEntryPoint}.
@@ -114,6 +115,23 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 
 		return new ErrorRes(INVALID_REQUEST, errors);
 	}
+	
+	/**
+	 * It is call when {@link MethodArgumentNotValidException} is thrown.
+	 *
+	 * @param ex error thrown.
+	 *
+	 * @return message: {@link DefaultValue#INVALID_REQUEST}, <br/>
+	 *         errors: {@link ConstraintViolationException#getMessage}
+	 *         wrapped in a {@link List}, of String <br/>
+	 *         and http status: {@link HttpStatus#BAD_REQUEST}.
+	 */
+	@ExceptionHandler(ConstraintViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorRes processConstraintViolationException(ConstraintViolationException ex) {
+		var error =  ex.getLocalizedMessage().replaceFirst("^.*\\.","");
+		return new ErrorRes(INVALID_REQUEST, error);
+	}
 
 	/**
 	 * It is call when {@link UserSingleAdminException} is thrown.
@@ -136,7 +154,7 @@ public class ExceptionFilter extends Http403ForbiddenEntryPoint {
 	 *
 	 * @param ex error thrown.
 	 *
-	 * @return message: {@link DefaultValue#USER_SINGLE_ADMIN}, <br/>
+	 * @return message: {@link DefaultValue#INCORRET_CREDENTIALS}, <br/>
 	 *         errors: {@link UsernameNotUniqueException#getMessage} wrapped in a
 	 *         {@link List}, <br/>
 	 *         and http status: {@link HttpStatus#CONFLICT}.

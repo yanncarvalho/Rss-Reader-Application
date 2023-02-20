@@ -15,8 +15,7 @@ import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_CREATED
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_DELETED;
 import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_UPDATED;
 
-import java.util.UUID;
-
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,9 +51,11 @@ import br.dev.yann.rssreader.auth.user.record.UpdateReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
 @RestController
+@Validated
 @RequestMapping("v1")
 public class UserController{
  
@@ -63,31 +65,30 @@ public class UserController{
   @Autowired
   private AuthenticationManager manager;
   
-
   @Autowired
   private JwtService tokenService;
 
 
   @Tag(name = "Admin")
   @Operation(description =  SWAGGER_FIND_USERS)
-  @GetMapping(value = "admin/findUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "admin/findUsers/", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
   public PageRes<FindByIdRes> findAll(
-		  @RequestParam(defaultValue = "0") @PositiveOrZero @Valid Integer page,
-		  @RequestParam(defaultValue = "10") @PositiveOrZero @Valid Integer size,
-		  @RequestParam(defaultValue = "id") @PositiveOrZero @Valid String sort){
+		  @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+		  @RequestParam(defaultValue = "10") @PositiveOrZero Integer size,
+		  @RequestParam(defaultValue = "id") @NotBlank String sort){
     var usersFound = service.findAllUsers(PageRequest.of(page, size, Sort.by(sort)));
     var userRes = usersFound.get().map(FindByIdRes::new).toList();
-    var pageImpl = new PageImpl<FindByIdRes>(userRes, usersFound.getPageable(), usersFound.getSize());
+    var pageImpl = new PageImpl<FindByIdRes>(userRes, usersFound.getPageable(), usersFound.getNumberOfElements());
 	return new PageRes<>(pageImpl);
-  }
+  }	
 
   @Tag(name = "Admin")
   @Operation(description = SWAGGER_FIND_USER_AS_ADMIN)
   @GetMapping(value = "admin/findUsers/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public FindByIdRes findByIdAsAdmin(@PathVariable("id") UUID id){
-    var  user = service.findById(id);
+  public FindByIdRes findByIdAsAdmin(@PathVariable("id")  @UUID String id){
+    var  user = service.findById(java.util.UUID.fromString(id)); 
     return new FindByIdRes(user);
   }
 
@@ -95,7 +96,7 @@ public class UserController{
   @Operation(description =  SWAGGER_UPDATE_USER_AS_ADMIN)
   @PutMapping(value = "admin/update", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public ControllerDefaultRes updateAsAdmin(@Valid @RequestBody UpdateAsAdminReq update){
+  public ControllerDefaultRes updateAsAdmin(@RequestBody UpdateAsAdminReq update){
     service.updateAsAdmin(update);
     return new ControllerDefaultRes(USER_UPDATED);
   }
@@ -104,8 +105,8 @@ public class UserController{
   @Operation(description = SWAGGER_DELETE_USER_AS_ADMIN)
   @DeleteMapping(value = "admin/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public ControllerDefaultRes deleteAsAdmin(@PathVariable("id") UUID id) {
-    service.deleteUser(id);
+  public ControllerDefaultRes deleteAsAdmin(@PathVariable("id") @UUID String id) {
+    service.deleteUser(java.util.UUID.fromString(id));
     return new ControllerDefaultRes(USER_DELETED);
   }
 
@@ -113,7 +114,7 @@ public class UserController{
   @Operation(description =  SWAGGER_UPDATE_USER)
   @PutMapping(value = "update", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public JwtRes updade(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id, @RequestBody @Valid UpdateReq update) {
+  public JwtRes updade(@RequestAttribute(name = ATTRIBUTE_UUID) java.util.UUID id, @RequestBody @Valid UpdateReq update) {
     User user = service.update(update, id);
     return createJwtResponse(user);
   }
@@ -121,7 +122,7 @@ public class UserController{
   @Operation(description = SWAGGER_DELETE_USER)
   @DeleteMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public ControllerDefaultRes delete(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id){
+  public ControllerDefaultRes delete(@RequestAttribute(name = ATTRIBUTE_UUID) java.util.UUID id){
 
 	service.deleteUser(id);
     return new ControllerDefaultRes(USER_DELETED);
@@ -131,7 +132,7 @@ public class UserController{
   @Operation(description =  SWAGGER_FIND_USER)
   @GetMapping(value = "find", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public FindByIdReq findById(@RequestAttribute(name = ATTRIBUTE_UUID) UUID id) {
+  public FindByIdReq findById(@RequestAttribute(name = ATTRIBUTE_UUID) java.util.UUID id) {
 	var user =  service.findById(id);
     return new FindByIdReq(user.getUsername(), user.getName());
   }
@@ -168,7 +169,7 @@ public class UserController{
    */
   private JwtRes createJwtResponse(User user) {
 	 var tokenJWT = tokenService.encode(user);
-     var exp = tokenService.decode(tokenJWT).getExpirationTime();
+     var exp = tokenService.decode(tokenJWT).getExpiresAt();
 
       return new JwtRes (tokenJWT, JWT_BEARER, exp);
   }

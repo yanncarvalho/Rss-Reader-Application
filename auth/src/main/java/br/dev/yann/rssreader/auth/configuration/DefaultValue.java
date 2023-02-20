@@ -23,15 +23,17 @@ public class DefaultValue {
 		"https://github.com/yanncarvalho/rss-reader-application/blob/main/LICENSE";
 	
 	// BEAN VALIDATION VALUES
-	public static final String BEAN_REGEX_START_WITH_LETTERS  = "([A-Za-z]{3}).*";
-	public static final String BEAN_REGEX_START_WITH_LETTERS_MESSAGE = "must start with 3 letters.";
-	public static final String BEAN_REGEX_USERNAME = "^(\\w|\\-|\\.)*$";
-	public static final String BEAN_REGEX_USERNAME_MESSAGE = 
+	public static final String START_WITH_LETTERS_PATTERN  = "([A-Za-z]{3}).*";
+	public static final String START_WITH_LETTERS_PATTERN_ERROR_MSG = "must start with 3 letters.";
+	public static final String USERNAME_PATTERN = "^(\\w|\\-|\\.)*$";
+	public static final String USERNAME_PATTERN_ERROR_MSG = 
 			"only allows underscore, hyphen, point, and alphanumeric characters except non-roman and no accented.";
-	public static final String BEAN_REGEX_NAME= "^(\\w|\\-|\\*|\\s)*$";
-	public static final String BEAN_REGEX_NAME_MESSAGE = 
+	public static final String NAME_PATTERN = "^(\\w|\\-|\\*|\\s)*$";
+	public static final String NAME_PATTERN_ERROR_MSG = 
 			"only allows underscore, hyphen, point, whitespace, and alphanumeric characters except non-roman and no accented.";
-			
+	public static final String UUID_PATTERN = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+	public static final String UUID_PATTERN_ERROR_MSG = "UUID informed is not valid.";
+
 	// EXCEPTION FILTERS VALUES
 	public static final String INCORRET_CREDENTIALS = "Incorrect credentials.";
 	public static final String GENERIC_ERROR = "Cannot proceed.";

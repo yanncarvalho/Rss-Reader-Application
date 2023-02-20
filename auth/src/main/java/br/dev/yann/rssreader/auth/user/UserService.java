@@ -145,11 +145,10 @@ public class UserService implements UserDetailsService{
     return repository.findById(id).orElseThrow(
     		() -> new UsernameNotFoundException(USER_NOT_FOUND));
   }
-  
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 	return repository.findByUsername(username).orElseThrow(
-			 () -> new UsernameNotFoundException(USER_NOT_FOUND));
+    		() -> new UsernameNotFoundException(USER_NOT_FOUND));
   }
 
 }

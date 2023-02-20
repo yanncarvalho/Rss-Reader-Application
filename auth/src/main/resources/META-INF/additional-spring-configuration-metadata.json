@@ -1,8 +1,8 @@
 {"properties": [
   {
-    "name": "jwt.token.duration-in-days",
+    "name": "jwt.token.duration-in-hours",
     "type": "java.lang.Integer",
-    "description": "Token expiry time in days"
+    "description": "Token expiry time in hours"
   },
   {
     "name": "jwt.token.secret",
@@ -37,6 +37,11 @@
   {
     "name": "flyway.default-schema",
     "type": "java.lang.String",
-    "description":  "Flyway schema"
+    "description": "Flyway schema"
+  },
+  {
+    "name": "flyway.baseline-on-migrate",
+    "type": "java.lang.Boolean",
+    "description": "Default: false \n Whether to automatically call baseline when migrating a non-empty schema."
   }
 ]}
