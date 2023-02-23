@@ -42,11 +42,7 @@ public class AuthProvider implements AuthenticationProvider {
 			return new UsernamePasswordAuthenticationToken(user, authentication.getCredentials(), user.getAuthorities());
 		} catch(Exception e) {
 			throw new BadCredentialsException(INCORRET_CREDENTIALS);
-		}
-
-
-		
-		
+		}		
 	}
 
 	@Override

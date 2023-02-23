@@ -87,7 +87,7 @@ public class UserService implements UserDetailsService{
 	 if(update.hasUsername() && existsUsername(update.username(), id)) 
 		 throw new UsernameNotUniqueException();
 	 
-	 var user =  repository.getReferenceById(id);
+	 var user = this.findById(id);
 	 
      if (update.hasName())
 	   	 user.setName(update.name());
@@ -115,7 +115,7 @@ public class UserService implements UserDetailsService{
 		 throw new UsernameNotUniqueException();
 	 }
 		 
-	 var user = repository.getReferenceById(update.id());
+	 var user = this.findById(update.id());
 
      if (update.hasName()) {
 	   	 user.setName(update.name());

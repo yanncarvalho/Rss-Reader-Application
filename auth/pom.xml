@@ -18,6 +18,12 @@
 		<spring-cloud.version>2022.0.0</spring-cloud.version>
 	</properties>
 	<profiles>
+		<profile>
+            <id>test</id>
+            <properties>
+               <spring.profiles.active>test</spring.profiles.active>
+        	 </properties>
+       	 </profile>
         <profile>
             <id>dev</id>
             <activation>
@@ -115,12 +121,17 @@
     		<artifactId>mockito-inline</artifactId>
     		<scope>test</scope>
 		</dependency>
-
-		
+              		
 		<dependency>
     		<groupId>org.flywaydb</groupId>
     		<artifactId>flyway-mysql</artifactId>
 		</dependency>
+		
+		<dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 		
 	</dependencies>
 	<dependencyManagement>
@@ -153,7 +164,7 @@
     			<groupId>org.flywaydb</groupId>
     			<artifactId>flyway-maven-plugin</artifactId>
    			    <configuration>
-       	      			<configFiles>src/main/resources/application.properties</configFiles>
+       	      			<configFiles>src/main/resources/application-${project.activeProfiles[0].id}.properties</configFiles>
         		</configuration>
 			</plugin>
 		</plugins>

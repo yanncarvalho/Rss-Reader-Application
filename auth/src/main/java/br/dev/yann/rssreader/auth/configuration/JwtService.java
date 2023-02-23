@@ -27,7 +27,7 @@ import br.dev.yann.rssreader.auth.user.User;
  *
  * @author Yann Carvalho
  */
-@Service
+@Service("jwtService")
 public class JwtService {
 	
 	/**

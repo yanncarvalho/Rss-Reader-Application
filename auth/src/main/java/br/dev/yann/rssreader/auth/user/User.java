@@ -69,12 +69,11 @@ public class User implements UserDetails{
    *
    * User role.
    * <br>
-   * By default role is {@link  RoleUser#USER User}.
    * @see UserRole
    */
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = SIZE_FIELD_MAX)
-  private UserRole role = UserRole.USER;
+  private UserRole role;
 
   /**
    * Empty constructor.
@@ -83,14 +82,19 @@ public class User implements UserDetails{
 
   /**
    * Constructs a {@code User} with name, password and username as parameters.
+   * <br>
+   * i.e.: set {@link #role} as {@link RoleUser#USER}.
+   * 
    * @param name value to {@link #name}.
    * @param password value to {@link #password}.
    * @param username value {@link #username}.
+   * 
    */
   public User(String name, String password, String username) {
     this.name = name;
     this.setPassword(password);
     this.username = username;
+    this.role = UserRole.USER;
   }
 
   /**
