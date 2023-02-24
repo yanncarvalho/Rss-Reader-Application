@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+
+  db-auth:
+    container_name: rssreader-auth-db
+    image: mysql
+    restart: always
+    env_file: ./.env
+    environment:
+      - MYSQL_USER=${AUTH_DB_USERNAME}
+      - MYSQL_ROOT_PASSWORD=${AUTH_DB_PASSWORD}
+      - MYSQL_PASSWORD=${AUTH_DB_PASSWORD}
+      - MYSQL_DATABASE=${AUTH_DB_SCHEMA}
+    ports:
+      - ${AUTH_DB_PORT}:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  auth:
+    container_name: rssreader-auth
+    build:
+        context: ./auth
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - db.schema=${AUTH_DB_SCHEMA}
+      - db.port=${AUTH_DB_PORT}
+      - db.host=db-auth
+      - db.password=${AUTH_DB_PASSWORD}
+      - db.username=${AUTH_DB_USERNAME}
+      - jwt.secret=${JWT_SECRET}
+      - jwt.duration-in-hours=${JWT_DURATION_IN_HOURS}
+      - PORT=${AUTH_PORT}
+    ports:
+      - ${AUTH_PORT}:${AUTH_PORT}
+    depends_on:
+      db-auth:
+        condition: service_healthy
+

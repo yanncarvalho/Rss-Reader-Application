@@ -1,0 +1,24 @@
+name: Tests
+
+on: [pull_request, push]
+
+env:
+    auth-directory: ./auth
+
+jobs:
+  auth-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{env.auth-directory}}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+          java-version: '17'
+          distribution: 'temurin'
+
+    - name: Build with Maven
+      run: mvn --batch-mode --update-snapshots clean install
