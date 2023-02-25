@@ -67,12 +67,13 @@ public class UserService implements UserDetailsService{
   /**
    * Create a new {@link User user}.
    * @param save {@link SaveReq data} with new user information.
+   * @return user created
    * @throws UsernameNotUniqueException if the update username is already used.
    */
-  public void save(SaveReq save) {
+  public User save(SaveReq save) {
 	  if(existsUsername(save.username())) 
 	    	throw new UsernameNotUniqueException();		
-	  repository.save(new User(save.name(), save.password(), save.username()));
+	  return repository.save(new User(save.name(), save.password(), save.username()));
   }
 
   /**
