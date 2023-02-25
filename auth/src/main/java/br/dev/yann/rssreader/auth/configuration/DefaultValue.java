@@ -84,5 +84,18 @@ public class DefaultValue {
 			"Before save the name is cleaned by removing excess whitespace.";
 	public static final String SWAGGER_SECURITY_DESCRIPTION = 
 			"Provide the JWT token. JWT token can be obtained from the Login API.";
+	
+	//LOGGER
+	public static final String LOGGER_ADMIN_FIND_USER(Object id) { return String.format("Admin required information about user %s.", id); }
+	public static final String LOGGER_ADMIN_FIND_ALL_USERS = "Admin required information about all users.";
+	public static final String LOGGER_ADMIN_UPDATE(Object id) { return String.format("User %s updated by admin.", id); }
+	public static final String LOGGER_ADMIN_DELETE(Object id) { return String.format("User %s deleted by admin.", id); }
+	public static final String LOGGER_USER_UPDATE(Object id) { return String.format("User %s updated by user.", id); }
+	public static final String LOGGER_USER_DELETE(Object id) { return String.format("User %s deleted by user.", id); }
+	public static final String LOGGER_USER_FIND(Object id) { return String.format("Returned info about user %s.", id); }
+	public static final String LOGGER_LOGIN(Object id) { return String.format("User %s login.", id); }
+	public static final String LOGGER_CREATE_USER(Object id) { return String.format("User %s created.", id); }
+	public static final String LOGGER_EXCEPTION_DEFAULT(Object userAddress, Object exceptionMsg) { return String.format("User with IP %s gets an exception: %s.", userAddress, exceptionMsg); }	
+
 }
 
