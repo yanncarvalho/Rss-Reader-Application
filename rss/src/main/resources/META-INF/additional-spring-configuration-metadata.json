@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "application.version",
+    "type": "java.lang.String",
+    "description": "Application version"
+  },
+  {
+    "name": "thread.maxpoolsize",
+    "type": "java.lang.String",
+    "description": "The ThreadPoolExecutor's maximum pool size."
+  },
+  {
+    "name": "thread.poolsize",
+    "type": "java.lang.String",
+    "description": "The ThreadPoolExecutor's core pool size."
+  },
+  {
+    "name": "thread.nameprefix",
+    "type": "java.lang.String",
+    "description": "The prefix to use for the names of newly created threads."
+  },
+  {
+    "name": "okhttp.call-timeout-in-minutes",
+    "type": "java.lang.String",
+    "description": "A description for 'okhttp.call-timeout-in-minutes'"
+  },
+  {
+    "name": "okhttp.connect-timeout-in-minutes",
+    "type": "java.lang.String",
+    "description": "A description for 'okhttp.connect-timeout-in-minutes'"
+  },
+  {
+    "name": "okhttp.read-timeout-in-minutes",
+    "type": "java.lang.String",
+    "description": "A description for 'okhttp.read-timeout-in-minutes'"
+  }
+]}

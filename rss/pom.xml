@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.0.3</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>br.dev.yann.rssreader</groupId>
+	<artifactId>rss</artifactId>
+	<version>1.0</version>
+	<name>rss</name>
+	<description>Rss reader project content provider</description>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<profiles>
+		   <profile>
+            <id>dev</id>
+            <activation>
+        	    <activeByDefault>true</activeByDefault>
+        	</activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+               <spring.profiles.active>prod</spring.profiles.active>
+        	 </properties>
+       	 </profile>
+	</profiles>
+	<dependencies>
+		
+		<dependency>
+    		<groupId>org.glassfish.jaxb</groupId>
+   			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+		
+		<dependency>
+    		<groupId>com.squareup.okhttp3</groupId>
+    		<artifactId>okhttp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		<dependency>
+    		<groupId>jakarta.xml.bind</groupId>
+    		<artifactId>jakarta.xml.bind-api</artifactId>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
