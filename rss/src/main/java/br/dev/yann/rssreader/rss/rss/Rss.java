@@ -1,12 +1,14 @@
 package br.dev.yann.rssreader.rss.rss;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
-import org.springframework.data.annotation.Id;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import br.dev.yann.rssreader.rss.rss.elements.Channel;
@@ -15,24 +17,37 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
+@Document("rss")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonPropertyOrder({"originalLink", "content"})
-@Document("rss")
+@JsonPropertyOrder({"id", "originalLink", "lastUpdate", "channel"})
 public class Rss {
 	
-   @Id
+   @MongoId
+   @JsonIgnore
    @XmlTransient
-   public String id;
+   public ObjectId id;
 
    @XmlTransient
+   @Indexed(unique = true)
    private String originalLink;
+   
+   @XmlTransient
+   private LocalDateTime lastUpdate;
 
-   @JsonProperty ("content")
-   @Field("content")
    private Channel channel;
 
-   public Rss() {}
+   public Rss() {
+	   lastUpdate = LocalDateTime.now();
+   }
+
+   public LocalDateTime getLastUpdate() {
+	return lastUpdate;
+   }
+
+   public void setLastUpdate(LocalDateTime lastUpdate) {
+	 this.lastUpdate = lastUpdate;
+   }
 
    /**
     * @return String return the originalLink
@@ -47,6 +62,8 @@ public class Rss {
    public void setOriginalLink(String originalLink) {
        this.originalLink = originalLink;
    }
+   
+   
    /**
     * @return Channel return the channel
     */
@@ -61,11 +78,11 @@ public class Rss {
        this.channel = channel;
    }
     
-   public String getId() {
+   public ObjectId getId() {
    	 return id;
    }
 
-   public void setId(String id) {
+   public void setId(ObjectId id) {
      this.id = id;
    }
 
@@ -91,9 +108,8 @@ public class Rss {
 
 	@Override
 	public String toString() {
-		return "Rss [id=" + id + ", originalLink=" + originalLink + ", channel=" + channel + "]";
+		return "Rss [id=" + id + ", originalLink=" + originalLink + ", lastUpdate=" + lastUpdate + ", channel="
+				+ channel + "]";
 	}
-
-
 
 }

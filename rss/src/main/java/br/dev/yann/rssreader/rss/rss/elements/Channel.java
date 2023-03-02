@@ -2,6 +2,7 @@ package br.dev.yann.rssreader.rss.rss.elements;
 
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import br.dev.yann.rssreader.rss.rss.elements.channel.elements.Cloud;
@@ -34,7 +35,7 @@ public class Channel {
   private Image image;
 
   @XmlElement(name = "item")
-  private List<Item> items = new ArrayList<>();
+  private List<Item> items;
 
   @XmlElement
   private TextInput textInput;
@@ -43,6 +44,7 @@ public class Channel {
   private Cloud cloud;
 
   public Channel() {
+	  items = new ArrayList<>();
   }
 
   /**
@@ -273,7 +275,7 @@ public class Channel {
    * @return List<Item> return the items
    */
   public List<Item> getItems() {
-    return items;
+    return Collections.unmodifiableList(items);
   }
 
   /**

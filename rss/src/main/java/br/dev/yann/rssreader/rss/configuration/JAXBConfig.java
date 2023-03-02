@@ -10,8 +10,8 @@ import jakarta.xml.bind.JAXBException;
 @Configuration
 public class JAXBConfig {
 
-	  @Bean
-	  JAXBContext context() throws JAXBException {
-	     return JAXBContext.newInstance(new Class[] { Rss.class });
-	  }
+	@Bean
+	JAXBContext context() throws JAXBException {
+	    return JAXBContext.newInstance(new Class[] { Rss.class });
+	}
 }

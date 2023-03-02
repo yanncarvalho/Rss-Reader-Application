@@ -1,10 +1,9 @@
 package br.dev.yann.rssreader.rss.rss;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,60 +15,42 @@ public class RssService {
   @Autowired
   private RssConvertor conv;	
   
+  @Autowired
+  private RssRepository respository;
 
-  //@Autowired
-  //private RssRepository respository;
-
-  public Set<String> findAll(long id) {
-
-    return null;
-  }
-
-  public void deleteRss(long id, Set<String> rssUrls) {
-	  return;
-  }
-
-  public void addRss(long id, Set<String> rssUrls) {
-	  return;
-  }
-
-  //public void deleteAllRss(long id) { this.dao.deleteAllRss(id); }
-
-  public List<String> getRssList(long id, List<String> rssUrls) {
-
-    return null;
+  public Optional<Rss> getRss(String url) {
+	return respository.findByUrls(url);
   }
   
-  public List<Rss> getRss(List<String> rssUrls) {
+  public List<Rss> getRssList(List<String> rssUrls) {
+   var rss = respository.findAllByUrls(rssUrls);
 
-	 
-	 var futures = rssUrls.stream().map(u -> conv.getFromUrl(u)).toList();
-	 CompletableFuture.allOf(futures.toArray(new CompletableFuture[rssUrls.size()])).join();
-	 return futures.stream().map(t -> {
-		try {
-			
-			return t.get();
-			
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}).toList();
-	 
+   List<String> urlsFounds = rss.stream().map(Rss::getOriginalLink).toList();
+   rssUrls.removeAll(urlsFounds);
+   if(!rssUrls.isEmpty()) {
+	   List<Rss> rssDownloaded = updateByUrlList(rssUrls);
+	   rss.addAll(rssDownloaded);
+   }
+
+   return rss;
 
   }
-
-  public String getUserRssContents(long id, int page, int size, int offset) {
-
-    return null;
-  }
-
-  public String convertRssUrls(List<String> urls, int page, int size, int offset) {
  
-    return null;
+  public void removeById(List<ObjectId> ids) {
+	  respository.removeById(ids);
   }
+  
+  public void removeByUrl(List<String> url) {
+	  respository.removeByUrl(url);
+  }
+	
+  public List<Rss> updateByUrlList(List<String> url) {
+	  List<Rss> rssList = conv.getRssFromUrList(url);
+	  respository.upsertAll(rssList);
+	  return rssList;
+  }
+	
+ 
 }
 
 

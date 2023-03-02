@@ -2,8 +2,10 @@ package br.dev.yann.rssreader.rss.rss;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +26,9 @@ public class RssController {
 
   @PostMapping(value = "getUserContents", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-   public List<Rss> getUrls(@RequestBody Map<String, List<String>> urls) throws InterruptedException, ExecutionException {
-	   return service.getRss(urls.get("url"));
+   public Optional<Rss> getUrls(@RequestBody Map<String, List<String>> urls) throws InterruptedException, ExecutionException {
+	  System.out.println(b +""+ e);
+	  return null;
    }
 }
+

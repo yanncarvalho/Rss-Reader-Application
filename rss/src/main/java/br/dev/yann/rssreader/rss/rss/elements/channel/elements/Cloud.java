@@ -23,8 +23,6 @@ public class Cloud {
   @XmlAttribute
   private String protocol;
 
-
-
   public Cloud() {
   }
 

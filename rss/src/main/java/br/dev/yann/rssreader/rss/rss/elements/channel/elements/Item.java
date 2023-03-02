@@ -1,6 +1,7 @@
 package br.dev.yann.rssreader.rss.rss.elements.channel.elements;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import br.dev.yann.rssreader.rss.rss.elements.channel.elements.item.elements.Category;
@@ -22,18 +23,22 @@ public class Item {
     private String description;
 
     @XmlElement
-    private Enclosure enclosure = new Enclosure();
+    private Enclosure enclosure;
 
     @XmlElement
     private Guid guid;
 
     private String pubDate;
+    
     private String source;
 
     @XmlElement(name = "category")
-    private List<Category> categories = new ArrayList<>();
+    private List<Category> categories;
 
     public Item() {
+    	
+    	categories = new ArrayList<>();
+    	enclosure = new Enclosure();
     }
 
     public String getTitle() {
@@ -117,7 +122,7 @@ public class Item {
     }
 
     public List<Category> getCategories() {
-      return categories;
+      return Collections.unmodifiableList(categories);
     }
 
     public void setCategories(List<Category> categories) {

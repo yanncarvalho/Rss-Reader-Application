@@ -10,15 +10,14 @@ import jakarta.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Guid {
-  public Guid() {
-		super();
-  }
 
   @XmlAttribute
   private String isPermaLink;
 
   @XmlElement
   private String guid;
+  
+  public Guid() {}
 
   public String getIsPermaLink() {
 		return isPermaLink;
