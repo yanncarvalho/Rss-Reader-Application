@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import br.dev.yann.rssreader.rss.rss.elements.Channel;
+import br.dev.yann.rssreader.rss.rss.rsselements.Channel;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -26,7 +26,7 @@ public class Rss {
    @MongoId
    @JsonIgnore
    @XmlTransient
-   public ObjectId id;
+   private ObjectId id;
 
    @XmlTransient
    @Indexed(unique = true)
@@ -38,15 +38,15 @@ public class Rss {
    private Channel channel;
 
    public Rss() {
-	   lastUpdate = LocalDateTime.now();
+      lastUpdate = LocalDateTime.now();
    }
 
    public LocalDateTime getLastUpdate() {
-	return lastUpdate;
+      return lastUpdate;
    }
 
    public void setLastUpdate(LocalDateTime lastUpdate) {
-	 this.lastUpdate = lastUpdate;
+       this.lastUpdate = lastUpdate;
    }
 
    /**

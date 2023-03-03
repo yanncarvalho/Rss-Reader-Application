@@ -1,4 +1,4 @@
-package br.dev.yann.rssreader.rss.rss.elements.channel.elements;
+package br.dev.yann.rssreader.rss.rss.rsselements.channelelements;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

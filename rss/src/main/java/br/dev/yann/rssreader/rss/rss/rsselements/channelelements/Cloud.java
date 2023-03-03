@@ -1,4 +1,6 @@
-package br.dev.yann.rssreader.rss.rss.elements.channel.elements;
+package br.dev.yann.rssreader.rss.rss.rsselements.channelelements;
+
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -18,6 +20,7 @@ public class Cloud {
   private String path;
 
   @XmlAttribute
+  @Field("register_procedure")
   private String registerProcedure;
 
   @XmlAttribute

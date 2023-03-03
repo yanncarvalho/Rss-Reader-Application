@@ -1,8 +1,9 @@
-package br.dev.yann.rssreader.rss.util;
+package br.dev.yann.rssreader.rss.rss.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -18,7 +19,7 @@ import jakarta.xml.bind.JAXBException;
 public class RssConvertor {
 	
    @Autowired 
-   private RequestXmlFromHttp job;
+   private RssRequestFromHttp job;
    
    @Autowired 
    private JAXBContext context;
@@ -29,27 +30,28 @@ public class RssConvertor {
           Rss rss = (Rss) context.createUnmarshaller().unmarshal(job.getXml(url));
 	      rss.setOriginalLink(url);
 	      return CompletableFuture.completedFuture(rss);
-
 	    } catch (JAXBException | IOException e) {
-	      throw new RuntimeException(e) ;
+	      return null;
 	    }
    }
    
    
    public List<Rss> getRssFromUrList(List<String> urlList) {
  	 var rss = new ArrayList<Rss>();
- 	 try {
- 		   
- 		    var futures = urlList.stream().map(u -> this.getFromUrl(u)).toList();
- 		    CompletableFuture.allOf(futures.toArray(new CompletableFuture[urlList.size()])).join();
- 		    for (CompletableFuture<Rss> completableFuture : futures) {
- 		    	Rss rss2 = completableFuture.get();
-		     	rss.add(rss2);
- 		     }
- 			
- 	   } catch (InterruptedException | ExecutionException e) {
- 			new RuntimeException(e);
- 	    }
+ 	 var futures = urlList.stream().map(u -> this.getFromUrl(u))
+ 		 	      .filter(Objects::nonNull)
+ 		 	      .toList();
+ 	 if (futures.isEmpty()) {
+ 	     return new ArrayList<>();
+ 	 }
+	 CompletableFuture.allOf(futures.toArray(new CompletableFuture[urlList.size()])).join();
+	 for (CompletableFuture<Rss> completableFuture : futures) {
+	      try {   	
+		  rss.add(completableFuture.get());
+	      	} catch (InterruptedException | ExecutionException e) {
+	      	    continue;
+	      	}
+	  }
  	 return rss;
    }
 

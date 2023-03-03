@@ -1,13 +1,13 @@
-package br.dev.yann.rssreader.rss.rss.elements;
+package br.dev.yann.rssreader.rss.rss.rsselements;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import br.dev.yann.rssreader.rss.rss.elements.channel.elements.Cloud;
-import br.dev.yann.rssreader.rss.rss.elements.channel.elements.Item;
-import br.dev.yann.rssreader.rss.rss.elements.channel.elements.TextInput;
+import br.dev.yann.rssreader.rss.rss.rsselements.channelelements.Cloud;
+import br.dev.yann.rssreader.rss.rss.rsselements.channelelements.Image;
+import br.dev.yann.rssreader.rss.rss.rsselements.channelelements.Item;
+import br.dev.yann.rssreader.rss.rss.rsselements.channelelements.TextInput;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -15,13 +15,13 @@ import jakarta.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Channel {
 
-  private String title;
+  private String title;  
   private String description;
   private String link;
-  private String language;
-  private String copyright;
+  private String language; 
+  private String copyright;  
   private String managingEditor;
-  private String webMaste;
+  private String webMaster;
   private String pubDate;
   private String lastBuildDate;
   private String category;
@@ -44,7 +44,7 @@ public class Channel {
   private Cloud cloud;
 
   public Channel() {
-	  items = new ArrayList<>();
+       items = new ArrayList<>();
   }
 
   /**
@@ -132,17 +132,17 @@ public class Channel {
   }
 
   /**
-   * @return String return the webMaste
+   * @return String return the webMaster
    */
-  public String getWebMaste() {
-    return webMaste;
+  public String getWebMaster() {
+    return webMaster;
   }
 
   /**
-   * @param webMaste the webMaste to set
+   * @param webMaste the webMaster to set
    */
-  public void setWebMaste(String webMaste) {
-    this.webMaste = webMaste;
+  public void setWebMaster(String webMaster) {
+    this.webMaster = webMaster;
   }
 
   /**
@@ -323,7 +323,7 @@ public class Channel {
     result = prime * result + ((language == null) ? 0 : language.hashCode());
     result = prime * result + ((copyright == null) ? 0 : copyright.hashCode());
     result = prime * result + ((managingEditor == null) ? 0 : managingEditor.hashCode());
-    result = prime * result + ((webMaste == null) ? 0 : webMaste.hashCode());
+    result = prime * result + ((webMaster == null) ? 0 : webMaster.hashCode());
     result = prime * result + ((pubDate == null) ? 0 : pubDate.hashCode());
     result = prime * result + ((lastBuildDate == null) ? 0 : lastBuildDate.hashCode());
     result = prime * result + ((category == null) ? 0 : category.hashCode());
@@ -378,10 +378,10 @@ public class Channel {
         return false;
     } else if (!managingEditor.equals(other.managingEditor))
       return false;
-    if (webMaste == null) {
-      if (other.webMaste != null)
+    if (webMaster == null) {
+      if (other.webMaster != null)
         return false;
-    } else if (!webMaste.equals(other.webMaste))
+    } else if (!webMaster.equals(other.webMaster))
       return false;
     if (pubDate == null) {
       if (other.pubDate != null)
@@ -449,7 +449,7 @@ public class Channel {
   @Override
   public String toString() {
     return "Channel [title=" + title + ", description=" + description + ", link=" + link + ", language=" + language
-        + ", copyright=" + copyright + ", managingEditor=" + managingEditor + ", webMaste=" + webMaste + ", pubDate="
+        + ", copyright=" + copyright + ", managingEditor=" + managingEditor + ", webMaste=" + webMaster + ", pubDate="
         + pubDate + ", lastBuildDate=" + lastBuildDate + ", category=" + category + ", docs=" + docs + ", ttl=" + ttl
         + ", rating=" + rating + ", skipHours=" + skipHours + ", skipDays=" + skipDays + ", image=" + image
         + ", items=" + items + ", textInput=" + textInput + ", cloud=" + cloud + "]";

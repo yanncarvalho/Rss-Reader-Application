@@ -1,4 +1,4 @@
-package br.dev.yann.rssreader.rss.rss.elements.channel.elements.item.elements;
+package br.dev.yann.rssreader.rss.rss.rsselements.channelelements.itemelements;
 
 import java.util.Objects;
 

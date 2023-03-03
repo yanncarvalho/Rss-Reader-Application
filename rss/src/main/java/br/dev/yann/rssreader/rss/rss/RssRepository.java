@@ -1,15 +1,19 @@
 package br.dev.yann.rssreader.rss.rss;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+
+import jakarta.annotation.Nullable;
 
 @Repository
 public class RssRepository {
@@ -31,9 +35,9 @@ public class RssRepository {
 	}
 	
 	public void upsertAll(List<Rss> listRss) {
-	   var urls = listRss.stream().map(Rss::getOriginalLink).toList();
-	   this.removeByUrl(urls);
-	   collection.bulkOps(BulkMode.UNORDERED, Rss.class).insert(listRss).execute();
+	    	var urls = listRss.stream().map(Rss::getOriginalLink).toList();
+	    	this.removeByUrl(urls);
+	    	collection.bulkOps(BulkMode.UNORDERED, Rss.class).insert(listRss).execute();
 	}
 	
 	public void removeById(List<ObjectId> ids) {
@@ -44,14 +48,31 @@ public class RssRepository {
 		this.remove(ORIGINAL_LINK, ids);
 	}
 	
-	public List<Rss> findAllByUrls(List<String> urls) {
-		var query = queryFindBy(ORIGINAL_LINK, urls);
-		return collection.find(query, Rss.class);
+	public Page<Rss> findAllByIds(List<ObjectId> ids,  Pageable pageable) {
+		var query = queryFindBy(DOCUMENT_ID, ids).with(pageable);
+		return PageableExecutionUtils.getPage(
+						collection.find(query, Rss.class), 
+						pageable,       
+		                () -> collection.count(query.skip(0).limit(0), Rss.class));
 	}
 	
-	public Optional<Rss> findByUrls(String url) {
+	public Page<Rss> findAllByUrls(List<String> urls,  Pageable pageable) {
+		var query = queryFindBy(ORIGINAL_LINK, urls).with(pageable);
+		var found = collection.find(query, Rss.class);
+		return PageableExecutionUtils
+					.getPage(found, 
+						pageable,       
+						() -> collection.count(query.skip(0).limit(0), Rss.class));
+	}
+	
+	public List<Rss> findAllByUrls(List<String> urls) {
+		var query = queryFindBy(ORIGINAL_LINK, urls);
+		return collection.find(query, Rss.class); 		
+	}
+	
+	public @Nullable Rss findByUrl(String url) {
 		var query = queryFindBy(ORIGINAL_LINK, List.of(url));
 		var findOne = collection.findOne(query, Rss.class);
-		return Optional.ofNullable(findOne);
+		return findOne;
 	}
 }

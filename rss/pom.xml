@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.3</version>
+		<version>3.0.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.dev.yann.rssreader</groupId>
@@ -33,6 +33,7 @@
         	 </properties>
        	 </profile>
 	</profiles>
+
 	<dependencies>
 		
 		<dependency>
@@ -59,19 +60,25 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        
+		<dependency>
+    		<groupId>org.hibernate.validator</groupId>
+    		<artifactId>hibernate-validator</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
-		
+	    </dependency>
+	    
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -82,5 +89,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

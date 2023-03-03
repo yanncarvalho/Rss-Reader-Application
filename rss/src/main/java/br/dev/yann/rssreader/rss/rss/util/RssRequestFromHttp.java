@@ -1,4 +1,4 @@
-package br.dev.yann.rssreader.rss.util;
+package br.dev.yann.rssreader.rss.rss.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import okhttp3.Request;
 
 
 @Component
-public class RequestXmlFromHttp {
+public class RssRequestFromHttp {
 
   @Autowired
   private OkHttpClient client;
