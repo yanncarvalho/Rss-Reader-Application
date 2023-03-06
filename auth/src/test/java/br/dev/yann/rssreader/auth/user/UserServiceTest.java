@@ -1,5 +1,5 @@
 package br.dev.yann.rssreader.auth.user;
-import static br.dev.yann.rssreader.auth.configuration.DefaultValue.USER_NOT_FOUND;
+import static com.github.yanncarvalho.rssreader.auth.configuration.DefaultValue.USER_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -21,11 +21,15 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import br.dev.yann.rssreader.auth.user.exception.UserSingleAdminException;
-import br.dev.yann.rssreader.auth.user.exception.UsernameNotUniqueException;
-import br.dev.yann.rssreader.auth.user.record.SaveReq;
-import br.dev.yann.rssreader.auth.user.record.UpdateAsAdminReq;
-import br.dev.yann.rssreader.auth.user.record.UpdateReq;
+import com.github.yanncarvalho.rssreader.auth.user.User;
+import com.github.yanncarvalho.rssreader.auth.user.UserRepository;
+import com.github.yanncarvalho.rssreader.auth.user.UserRole;
+import com.github.yanncarvalho.rssreader.auth.user.UserService;
+import com.github.yanncarvalho.rssreader.auth.user.exception.UserSingleAdminException;
+import com.github.yanncarvalho.rssreader.auth.user.exception.UsernameNotUniqueException;
+import com.github.yanncarvalho.rssreader.auth.user.record.SaveReq;
+import com.github.yanncarvalho.rssreader.auth.user.record.UpdateAsAdminReq;
+import com.github.yanncarvalho.rssreader.auth.user.record.UpdateReq;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
