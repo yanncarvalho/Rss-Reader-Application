@@ -49,8 +49,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.yanncarvalho.rssreader.auth.configuration.JwtService;
 import com.github.yanncarvalho.rssreader.auth.user.record.ControllerDefaultRes;
-import com.github.yanncarvalho.rssreader.auth.user.record.FindByIdReq;
 import com.github.yanncarvalho.rssreader.auth.user.record.FindByIdRes;
+import com.github.yanncarvalho.rssreader.auth.user.record.FindByIdAsAdminRes;
 import com.github.yanncarvalho.rssreader.auth.user.record.JwtRes;
 import com.github.yanncarvalho.rssreader.auth.user.record.LoginReq;
 import com.github.yanncarvalho.rssreader.auth.user.record.PageRes;
@@ -85,13 +85,13 @@ public class UserController{
   @Operation(description =  SWAGGER_FIND_USERS)
   @GetMapping(value = "admin/findUsers/", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
-  public PageRes<FindByIdRes> findAll(
+  public PageRes<FindByIdAsAdminRes> findAll(
 		  @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
 		  @RequestParam(defaultValue = "10") @PositiveOrZero Integer size,
 		  @RequestParam(defaultValue = "id") @NotBlank String sort){
     var usersFound = service.findAllUsers(PageRequest.of(page, size, Sort.by(sort)));
-    var userRes = usersFound.get().map(FindByIdRes::new).toList();
-    var pageImpl = new PageImpl<FindByIdRes>(userRes, usersFound.getPageable(), usersFound.getNumberOfElements());
+    var userRes = usersFound.get().map(FindByIdAsAdminRes::new).toList();
+    var pageImpl = new PageImpl<FindByIdAsAdminRes>(userRes, usersFound.getPageable(), usersFound.getNumberOfElements());
 	logger.info(LOGGER_ADMIN_FIND_ALL_USERS);
     return new PageRes<>(pageImpl);
   }	
@@ -100,10 +100,10 @@ public class UserController{
   @Operation(description = SWAGGER_FIND_USER_AS_ADMIN)
   @GetMapping(value = "admin/findUsers/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public FindByIdRes findByIdAsAdmin(@PathVariable("id")  @UUID String id){
+  public FindByIdAsAdminRes findByIdAsAdmin(@PathVariable("id")  @UUID String id){
     var  user = service.findById(java.util.UUID.fromString(id)); 
 	logger.info(LOGGER_ADMIN_FIND_USER(id));
-    return new FindByIdRes(user);
+    return new FindByIdAsAdminRes(user);
   }
 
   @Tag(name = "Admin")
@@ -149,10 +149,10 @@ public class UserController{
   @Operation(description =  SWAGGER_FIND_USER)
   @GetMapping(value = "find", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public FindByIdReq findById(@RequestAttribute(name = ATTRIBUTE_UUID) java.util.UUID id) {
+  public FindByIdRes findById(@RequestAttribute(name = ATTRIBUTE_UUID) java.util.UUID id) {
 	var user = service.findById(id);
 	logger.info(LOGGER_USER_FIND(user.getId()));
-    return new FindByIdReq(user.getUsername(), user.getName());
+    return new FindByIdRes(user.getId(), user.getUsername(), user.getName());
   }
 
   @Tag(name = "Login")

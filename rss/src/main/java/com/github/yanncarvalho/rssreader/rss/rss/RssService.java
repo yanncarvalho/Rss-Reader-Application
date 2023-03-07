@@ -18,8 +18,8 @@ import com.github.yanncarvalho.rssreader.rss.rss.util.RssConvertor;
 public class RssService {
 
   @Autowired
-  private RssConvertor conv;	
-  
+  private RssConvertor conv;
+
   @Autowired
   private RssRepository respository;
 
@@ -34,13 +34,13 @@ public class RssService {
      }
      return Optional.ofNullable(found);
   }
-  
+
   public Page<Rss> findRssByUrls(List<String> rssUrls, Pageable pageable) {
     var rss = respository.findAllByUrls(rssUrls, pageable);
     var urlsFoundAndUpdated = rss.stream().filter(r -> isRssUpdated(r))
     					  .map(Rss::getOriginalLink)
     					  .toList();
-    var updateList = new ArrayList<>(rssUrls); 
+    var updateList = new ArrayList<>(rssUrls);
     updateList.removeAll(urlsFoundAndUpdated);
     if(!updateList.isEmpty()) {
 	   updateByUrlList(updateList);
@@ -48,14 +48,14 @@ public class RssService {
     }
     return rss;
   }
-  
+
   public List<Rss> findRssByUrls(List<String> rssUrls) {
       var rss = respository.findAllByUrls(rssUrls);
       var urlsFoundAndUpdated = rss.stream()
 	      			      .filter(r -> isRssUpdated(r))
       				      .map(Rss::getOriginalLink)
       				      .toList();
-      var updateList = rssUrls; 
+      var updateList = rssUrls;
       updateList.removeAll(urlsFoundAndUpdated);
       if(!updateList.isEmpty()) {
   	   updateByUrlList(updateList);
@@ -63,33 +63,32 @@ public class RssService {
       }
       return rss;
    }
-  
+
   public Page<Rss> findRssByIds(List<ObjectId> rssId, Pageable pageable) {
       return respository.findAllByIds(rssId, pageable);
   }
- 
+
   public void removeById(List<ObjectId> ids) {
       respository.removeById(ids);
   }
-  
+
   public void removeByUrl(List<String> url) {
       respository.removeByUrl(url);
   }
-	
+
   public void updateByUrlList(List<String> url) {
       List<Rss> rssList = conv.getRssFromUrList(url);
-      //TODO incluir não encontrados
       if(rssList.isEmpty()) {
 	  return;
       }
-      respository.upsertAll(rssList);	     
+      respository.upsertAll(rssList);
   }
- 
+
   private boolean isRssUpdated(Rss rss) {
       var updateTime = LocalDateTime.now().minus(24, ChronoUnit.HOURS);
-      return rss != null && !rss.getLastUpdate().isBefore(updateTime);		  		
+      return rss != null && !rss.getLastUpdate().isBefore(updateTime);
   }
- 
+
 }
 
 

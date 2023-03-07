@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,26 +36,26 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   public Page<Rss> getRss(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
 		          @RequestParam(defaultValue = "5") @PositiveOrZero Integer size,
-		          @RequestParam(name = "id") java.util.UUID userId) {
+		          @RequestAttribute(name = "userUUID") java.util.UUID userId) {
 	return service.getRss(userId, PageRequest.of(page, size));
   }
   
   @GetMapping(value = "findUrl", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public User findUrl(@RequestParam(name = "id") java.util.UUID userId) {
+  public User findUrl(@RequestAttribute(name = "userUUID") java.util.UUID userId) {
       return service.findOrCreateUser(userId); 	
   }
   
   @PostMapping(value = "hasUrl", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public List<String> hasUrl(@RequestParam(name = "id") java.util.UUID userId,
+  public List<String> hasUrl(@RequestAttribute(name = "userUUID") java.util.UUID userId,
 	  	    	     @RequestBody @NotNull RssReq rss) {
       return service.getRssList(userId, rss.urls()); 	
   }
   
   @PostMapping(value = "add", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public List<String> add(@RequestParam(name = "id") java.util.UUID userId, 
+  public List<String> add(@RequestAttribute(name = "userUUID") java.util.UUID userId, 
 	  		  @RequestBody @NotNull RssReq rss) {
       	var notAdd = service.insertRss(userId, rss.urls());
 	return notAdd;
@@ -62,14 +63,14 @@ public class UserController {
   
   @DeleteMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public void delete(@RequestParam(name = "id") java.util.UUID userId, 
+  public void delete(@RequestAttribute(name = "userUUID") java.util.UUID userId, 
 	  	     @RequestBody @NotNull RssReq rss) {
        	service.deleteRss(userId, rss.urls()); 	
   }
   
   @DeleteMapping(value = "deleteAll", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
-  public void deleteAll(@RequestParam(name = "id") java.util.UUID userId) {
+  public void deleteAll(@RequestAttribute(name = "userUUID") java.util.UUID userId) {
        	service.deleteAllRss(userId); 	
   }
   
