@@ -1,6 +1,6 @@
 package br.dev.yann.rssreader.auth.user;
 
-import static com.github.yanncarvalho.rssreader.auth.user.UserRole.ADMIN;
+import static io.github.yanncarvalho.rssreader.auth.user.UserRole.ADMIN;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,10 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.github.yanncarvalho.rssreader.auth.AuthApplication;
-import com.github.yanncarvalho.rssreader.auth.user.User;
-import com.github.yanncarvalho.rssreader.auth.user.UserRepository;
-import com.github.yanncarvalho.rssreader.auth.user.UserRole;
+import io.github.yanncarvalho.rssreader.auth.AuthApplication;
+import io.github.yanncarvalho.rssreader.auth.user.User;
+import io.github.yanncarvalho.rssreader.auth.user.UserRepository;
+import io.github.yanncarvalho.rssreader.auth.user.UserRole;
 
 @SpringBootTest
 @ContextConfiguration(classes = AuthApplication.class)
