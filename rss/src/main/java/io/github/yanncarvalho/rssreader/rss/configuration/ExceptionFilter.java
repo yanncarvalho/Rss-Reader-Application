@@ -1,7 +1,6 @@
 package io.github.yanncarvalho.rssreader.rss.configuration;
 import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.DATA_NULL;
 import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.GENERIC_ERROR;
-import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.INTERNAL_SERVER_ERROR;
 import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.INVALID_REQUEST;
 import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.LOGGER_EXCEPTION_DEFAULT;
 import static io.github.yanncarvalho.rssreader.rss.configuration.DefaultValue.NOT_FOUND_URL;
@@ -45,23 +44,6 @@ import jakarta.validation.ConstraintViolationException;
 public class ExceptionFilter  extends DefaultErrorAttributes{
 	
 	private static Logger logger = LoggerFactory.getLogger(ExceptionFilter.class);
-
-	/**
-	 * The most generic handler. It is call when {@link Exception} is thrown.
-	 *
-	 * @param ex error thrown.
-	 * @param request information for HTTP servlets.
-	 * 
-	 * @return message: {@link DefaultValue#INTERNAL_SERVER_ERROR}, <br/>
-	 *         errors: {@link Exception#getLocalizedMessage} wrapped in a {@link List}, <br/>
-	 *         and http status: {@link HttpStatus#INTERNAL_SERVER_ERROR}.
-	 */
-	@ExceptionHandler(Exception.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorRes processException(Exception ex, HttpServletRequest request) {
-		logger.error(LOGGER_EXCEPTION_DEFAULT(request.getRemoteAddr(), ex));
-		return new ErrorRes(HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
-	}
 
 	@Override
 	public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
