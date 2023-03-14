@@ -2,32 +2,27 @@ package factory
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"time"
 
+	"github.com/yanncarvalho/rss-reader-application/mongodb-crawler/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/*
-Connect to my cluster
-*/
-func ConectMongo(url string, database string, collection string) (*mongo.Collection, context.Context) {
-
-
-	client, err := mongo.NewClient(options.Client().ApplyURI(url))
+//Connect to mongo database
+func ConectMongo() (*mongo.Collection, context.Context, context.CancelFunc) {
+	uri, database, collection := util.LoadEnvMongoDB(".env")
+	
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	err = client.Connect(ctx)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	//TODO ver o que fazer com o cancel
-	fmt.Println(cancel)
 
-	return client.Database(database).Collection(collection), ctx
+	return client.Database(database).Collection(collection), ctx, cancel
 }

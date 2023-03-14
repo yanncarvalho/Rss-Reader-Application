@@ -21,8 +21,8 @@ public class RssRepository {
 	@Autowired
 	private MongoTemplate collection;
 
-	private final static String ORIGINAL_LINK = "originalLink";
-	private final static String DOCUMENT_ID = "id";
+	private static final String ORIGINAL_LINK = "originalLink";
+	private static final String DOCUMENT_ID = "id";
 
 	private void remove(String key, List<?> parameter) {
 		collection.bulkOps(BulkMode.UNORDERED, Rss.class)

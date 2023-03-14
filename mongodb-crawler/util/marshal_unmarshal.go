@@ -3,25 +3,17 @@ package util
 import (
 	"encoding/json"
 
-	"log"
-
 	"encoding/xml"
 )
 
-func UnmarshalXml[T any](body []byte) T {
+func UnmarshalXml[T any](body []byte) (T, error) {
 	var response T
-	if err := xml.Unmarshal(body, &response); err != nil {
-		log.Fatal(err)
-	}
-
-	return response
+	err := xml.Unmarshal(body, &response)
+	return response, err
 }
 
-func UnmarshalJson[T any](body []byte) T {
+func UnmarshalJson[T any](body []byte) (T, error) {
 	var response T
-	if err := json.Unmarshal(body, &response); err != nil {
-		log.Fatal(err)
-	}
-
-	return response
+	err := json.Unmarshal(body, &response)
+	return response, err
 }

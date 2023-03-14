@@ -1,17 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/yanncarvalho/rss-reader-application/mongodb-crawler/model"
-	"github.com/yanncarvalho/rss-reader-application/mongodb-crawler/util"
+	"github.com/yanncarvalho/rss-reader-application/mongodb-crawler/service"
+
+	"time"
 )
 
+var timeSleepInMinutes time.Duration = 300
+
 func main() {
+	log.Println("Start Application")
+	for {
+		service.UpsertRss()
+		log.Printf("End all Rss to update, sleep for %d minutes", timeSleepInMinutes)
+		time.Sleep(timeSleepInMinutes * time.Minute)
+	}
 
-	body := util.RequestGetBody("http://localhost:9091/rss/dev", 60)
-
-	resp := util.UnmarshalJson[model.ConfigServer](body)
-
-	fmt.Print(resp.PropertySources[0].Source["spring.data.mongodb.uri"])
 }
