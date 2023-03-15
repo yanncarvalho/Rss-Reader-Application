@@ -16,8 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import  org.springframework.security.core.Authentication;
 
-import br.dev.yann.rssreader.auth.user.User;
-import br.dev.yann.rssreader.auth.user.UserService;
+import io.github.yanncarvalho.rssreader.auth.configuration.AuthProvider;
+import io.github.yanncarvalho.rssreader.auth.user.User;
+import io.github.yanncarvalho.rssreader.auth.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthProviderTest {

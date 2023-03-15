@@ -1,6 +1,6 @@
 package br.dev.yann.rssreader.auth.user;
 
-import static br.dev.yann.rssreader.auth.user.UserRole.ADMIN;
+import static io.github.yanncarvalho.rssreader.auth.user.UserRole.ADMIN;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,8 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+
+import io.github.yanncarvalho.rssreader.auth.AuthApplication;
+import io.github.yanncarvalho.rssreader.auth.user.User;
+import io.github.yanncarvalho.rssreader.auth.user.UserRepository;
+import io.github.yanncarvalho.rssreader.auth.user.UserRole;
 
 @SpringBootTest
+@ContextConfiguration(classes = AuthApplication.class)
 @ActiveProfiles("test")	
 class UserRepositoryTest {
 

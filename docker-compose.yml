@@ -2,7 +2,7 @@ version: '3.9'
 services:
 
   db-auth:
-    container_name: rssreader-auth-db
+    container_name: rssreader-db-auth
     image: mysql
     restart: always
     env_file: ./.env
@@ -17,6 +17,8 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
+    networks:
+      - mysql-auth
 
   auth:
     container_name: rssreader-auth
@@ -32,10 +34,161 @@ services:
       - db.username=${AUTH_DB_USERNAME}
       - jwt.secret=${JWT_SECRET}
       - jwt.duration-in-hours=${JWT_DURATION_IN_HOURS}
-      - PORT=${AUTH_PORT}
+      - AUTH_PORT=${AUTH_PORT}
+      - EUREKA_SERVER=http://eureka-server:${EUREKA_PORT}/eureka
+      - CONFIG_SERVER=http://config-server:${CONFIG_SERVER_PORT}
     ports:
       - ${AUTH_PORT}:${AUTH_PORT}
+    healthcheck:
+      test: wget http://localhost:${AUTH_PORT}/swagger-ui.html || exit
+      timeout: 20s
+      retries: 10
     depends_on:
-      db-auth:
+      config-server:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db-auth:
+        condition: service_started
+    networks:
+      - auth-net
+      - eureka-net
+      - mysql-auth
+
+  db-rss:
+    image: mongo:4.4.6
+    container_name: rssreader-db-rss
+    ports:
+      - ${MONGO_PORT}:27017
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+    networks:
+      - mongodb_net
+
+  rss:
+    container_name: rssreader-rss
+    build:
+        context: ./rss
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - RSS_PORT=${RSS_PORT}
+      - MONGO_URI=mongodb://db-rss:${MONGO_PORT}/
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - EUREKA_SERVER=http://eureka-server:${EUREKA_PORT}/eureka
+      - CONFIG_SERVER=http://config-server:${CONFIG_SERVER_PORT}
+    ports:
+      - ${RSS_PORT}:${RSS_PORT}
+    depends_on:
+      auth:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db-rss:
+        condition: service_started
+    networks:
+      - mongodb_net
+      - auth-net
+      - eureka-net
+
+  eureka-server:
+    restart: always
+    container_name: rssreader-eureka-server
+    build:
+        context: ./eureka-server
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - ${EUREKA_PORT}:${EUREKA_PORT}
+    healthcheck:
+      test: wget http://localhost:${EUREKA_PORT} || exit
+      timeout: 20s
+    networks:
+      - eureka-net
+
+  cloud-gateway:
+    container_name: rssreader-cloud-gateway
+    build:
+        context: ./cloud-gateway
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - GATEWAY_PORT=${GATEWAY_PORT}
+      - EUREKA_SERVER=http://eureka-server:${EUREKA_PORT}/eureka
+    ports:
+      - ${GATEWAY_PORT}:${GATEWAY_PORT}
+    depends_on:
+        eureka-server:
+          condition: service_healthy
+    networks:
+      - rss-net
+      - auth-net
+      - eureka-net
+      - gateway-cloud-net
+    healthcheck:
+      test: wget http://localhost:${GATEWAY_PORT}/actuator/gateway/routes || exit
+      timeout: 20s
+
+  config-server:
+    container_name: rssreader-config-server
+    build:
+        context: ./config-server
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - CONFIG_SERVER_PORT=${CONFIG_SERVER_PORT}
+      - MONGO_URI=mongodb://mongodb_net:${MONGO_PORT}/
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - db.schema=${AUTH_DB_SCHEMA}
+      - db.port=${AUTH_DB_PORT}
+      - db.host=db-auth
+      - db.password=${AUTH_DB_PASSWORD}
+      - db.username=${AUTH_DB_USERNAME}
+      - jwt.secret=${JWT_SECRET}
+      - jwt.duration-in-hours=${JWT_DURATION_IN_HOURS}
+    ports:
+      - ${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}
+    healthcheck:
+      test: wget http://localhost:${CONFIG_SERVER_PORT}/default/default || exit
+      timeout: 20s
+      retries: 10
+    networks:
+      - rss-net
+      - auth-net
+
+  mongodb-crawler:
+    container_name: rssreader-mongodb-crawler
+    build:
+        context: ./mongodb-crawler
+        dockerfile: Dockerfile
+    env_file: ./.env
+    environment:
+      - CONFIG_SERVER=http://config-server:${CONFIG_SERVER_PORT}
+      - MONGODB_URI=mongodb://db-rss:${MONGO_PORT}/
+      - MONGO_CRAWLER_PORT=${MONGO_CRAWLER_PORT}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - MONGODB_DOCUMENT=${MONGODB_DOCUMENT}
+    ports:
+      - ${MONGO_CRAWLER_PORT}:${MONGO_CRAWLER_PORT}
+    depends_on:
+       config-server:
+          condition: service_healthy
+       db-rss:
+          condition: service_started
+    networks:
+      - mongodb_net
+      - config-net
+
+networks:
+  gateway-cloud-net:
+  mongodb_net:
+  auth-net:
+  mysql-auth:
+  rss-net:
+  eureka-net:
+  config-net:
 

@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.3</version>
+		<version>3.0.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.dev.yann.rssreader</groupId>
+	<groupId>com.github.yanncarvalho.rssreader</groupId>
 	<artifactId>auth</artifactId>
 	<version>1.0</version>
 	<name>auth</name>
-	<description>Auth of Rss reader project</description>
+	<description>Rss Reader project authentication</description>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2022.0.0</spring-cloud.version>
@@ -91,6 +91,10 @@
     		<version>3.0.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
 
 		<dependency>
     		<groupId>org.springdoc</groupId>
@@ -153,8 +157,6 @@
             <filtering>true</filtering>
           </resource>
         </resources>
-
-
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -163,9 +165,6 @@
 			<plugin>
     			<groupId>org.flywaydb</groupId>
     			<artifactId>flyway-maven-plugin</artifactId>
-   			    <configuration>
-       	      			<configFiles>src/main/resources/application-${project.activeProfiles[0].id}.properties</configFiles>
-        		</configuration>
 			</plugin>
 		</plugins>
 	</build>

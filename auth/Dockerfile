@@ -6,8 +6,8 @@ RUN ./mvnw clean install
 # Production
 FROM eclipse-temurin:17-jre-alpine as production-stage
 COPY --from=base-stage target/*.jar app.jar
-ARG PORT=80
-ARG PROFILE=prod
+ARG AUTH_PORT=80
+ARG PROFILE_AUTH=prod
 ARG db.schema
 ARG db.host
 ARG db.port
@@ -15,9 +15,10 @@ ARG db.password
 ARG db.username
 ARG jwt.secret
 ARG jwt.duration-in-hours
-ENV PROFILE=$PROFILE
-ENV PORT=$PORT
-EXPOSE $PORT
+ARG EUREKA_SERVER
+ENV PROFILE=$PROFILE_AUTH
+ENV AUTH_PORT=$AUTH_PORT
+EXPOSE $AUTH_PORT
 ENTRYPOINT ["java","-Dspring.profiles.active=${PROFILE}", "-jar", "app.jar"]
 
 
