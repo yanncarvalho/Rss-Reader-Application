@@ -1,0 +1,87 @@
+name: Docker push
+
+on:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+    branches: [main]
+env:
+  auth-directory: ./auth
+  rss-directory: ./rss
+  cloud-gateway-directory: ./cloud-gateway
+  config-server-directory: ./config-server
+  eureka-server-directory: ./eureka-server
+  mongodb-crawler-directory: ./mongo-crawler
+jobs:
+  push-images:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Docker Login
+      uses: docker/login-action@v2.0.0
+      with:
+        username: yanncarvalho
+        password: ${{ secrets.PASSWORD_DOCKER_HUB }}
+
+    - name: Build and push rss auth Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.auth-directory}}/
+        file: ${{env.auth-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-auth:latest
+          yanncarvalho/rssreader-auth:${{ github.sha }}
+
+    - name: Build and push rss Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.rss-directory}}/
+        file: ${{env.rss-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-rss:latest
+          yanncarvalho/rssreader-rss:${{ github.sha }}
+
+    - name: Build and push gateway Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.cloud-gateway-directory}}/
+        file: ${{env.cloud-gateway-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-cloud-gateway:latest
+          yanncarvalho/rssreader-cloud-gateway:${{ github.sha }}
+
+    - name: Build and push config server Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.config-server-directory}}/
+        file: ${{env.config-server-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-config-server:latest
+          yanncarvalho/rssreader-config-server:${{ github.sha }}
+
+    - name: Build and push eureka server Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.eureka-server-directory}}/
+        file: ${{env.eureka-server-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-eureka-server:latest
+          yanncarvalho/rssreader-eureka-server:${{ github.sha }}
+
+    - name: Build and push eureka server Docker images
+      uses: docker/build-push-action@v3.0.0
+      with:
+        context: ${{env.mongodb-crawler-directory}}/
+        file: ${{env.mongodb-crawler-directory}}/Dockerfile
+        push: true
+        tags: |
+          yanncarvalho/rssreader-mongodb-crawler:latest
+          yanncarvalho/rssreader-mongodb-crawler:${{ github.sha }}
+

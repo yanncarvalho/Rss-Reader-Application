@@ -67,15 +67,15 @@ import jakarta.validation.constraints.PositiveOrZero;
 @RestController
 @RequestMapping("v1")
 public class UserController{
-	
+
   private static Logger logger = LoggerFactory.getLogger(UserController.class);
- 
+
   @Autowired
   private UserService service;
 
   @Autowired
   private AuthenticationManager manager;
-  
+
   @Autowired
   private JwtService tokenService;
 
@@ -92,14 +92,14 @@ public class UserController{
     var pageImpl = new PageImpl<FindByIdAsAdminRes>(userRes, usersFound.getPageable(), usersFound.getNumberOfElements());
 	logger.info(LOGGER_ADMIN_FIND_ALL_USERS);
     return new PageRes<>(pageImpl);
-  }	
+  }
 
   @Tag(name = "Admin")
   @Operation(description = SWAGGER_FIND_USER_AS_ADMIN)
   @GetMapping(value = "admin/findUsers/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public FindByIdAsAdminRes findByIdAsAdmin(@PathVariable("id")  @UUID String id){
-    var  user = service.findById(java.util.UUID.fromString(id)); 
+    var  user = service.findById(java.util.UUID.fromString(id));
 	logger.info(LOGGER_ADMIN_FIND_USER(id));
     return new FindByIdAsAdminRes(user);
   }
@@ -158,7 +158,7 @@ public class UserController{
   @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public JwtRes login(@Valid @RequestBody LoginReq login) {
-	UsernamePasswordAuthenticationToken token = 
+	UsernamePasswordAuthenticationToken token =
 			new	UsernamePasswordAuthenticationToken(
 						login.username(),
 						login.password());

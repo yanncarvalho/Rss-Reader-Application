@@ -26,7 +26,7 @@ public class SwaggerConfig {
    private String version;
 
    private String securitySchema = "bearerAuth";
-   
+
    @Bean
    OpenAPI customOpenAPI() {
         return new OpenAPI()

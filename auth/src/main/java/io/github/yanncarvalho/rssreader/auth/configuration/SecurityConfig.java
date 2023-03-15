@@ -18,6 +18,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import io.github.yanncarvalho.rssreader.auth.user.UserRole;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig  {
@@ -44,7 +46,7 @@ public class SecurityConfig  {
     static final String[] AUTH_ADMIN = {
 			"/v*/admin/**"
 	};
-    
+
 	/**
 	 * All elements of Whitelist
 	 */
@@ -52,11 +54,11 @@ public class SecurityConfig  {
 			CONTROLLER_WHITELIST,
 			SWAGGER_WHITELIST);
 
-  
+
     @Autowired
     private JwtFilter jwtFilter;
 
- 
+
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
@@ -69,16 +71,14 @@ public class SecurityConfig  {
 	@Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
-				  .csrf().disable()
-				  .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				  .and().authorizeHttpRequests(
-						authorize -> authorize
-							.requestMatchers(SecurityConfig.AUTH_ADMIN).hasRole(UserRole.ADMIN.name())
-							.requestMatchers(SecurityConfig.CONTROLLER_WHITELIST).permitAll()
-							.anyRequest().authenticated())
-				  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-				  .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
-				  .and().build();
+                .csrf((crfs) -> crfs.disable())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests(
+                authorize -> authorize
+                        .requestMatchers(SecurityConfig.AUTH_ADMIN).hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(SecurityConfig.CONTROLLER_WHITELIST).permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint())).build();
 	}
 
     /**
@@ -91,7 +91,7 @@ public class SecurityConfig  {
         return configuration.getAuthenticationManager();
     }
 
-  
+
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint(){
         return new ExceptionFilter();

@@ -13,17 +13,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-		 
+
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
- 
+
 	@Autowired
 	private SecurityFilter filter;
-	
+
 
 	static final String[] WHITELIST = {
 			  "/swagger-ui/**",
@@ -43,15 +45,14 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
-				  .csrf().disable()
-				  .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				  .and()
-				  .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-				  .build();
+                .csrf((csrf) -> csrf.disable())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .build();
 	}
-    
-    
-    
+
+
+
     /**
      * Authentication manager setup.
      * @param configuration the authentication configuration.
@@ -62,7 +63,7 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-  
+
 
 
 
